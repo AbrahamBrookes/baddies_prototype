@@ -1,0 +1,11 @@
+#game {
+	width: 411px;
+	height: 731px;
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	margin: 0 auto auto;
+	border: 1px solid grey;
+}
