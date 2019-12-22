@@ -1,10 +1,17 @@
+import { Battleable } from './Battleable'
 
-export class Enemy {
+export class Enemy extends Battleable {
 	constructor( init ){
-		this.name = init.name 			|| 'Untitled Enemy';
-		this.health = init.health		|| 1;
-		this.attack = init.attack		|| 1;
-		this.defense = init.defense		|| 1;
-		this.speed = init.speed			|| 1;
+		super(init);
+		this.name = init.name 					|| 'Untitled Enemy';
+		this.speed_stat = init.speed			|| 1; // attack timer - larger is slower
 	}
+	
+	get speed(){
+		return this.speed_stat;
+	}
+	set speed( value ){
+		this.speed_stat = value;
+	}
+	
 }

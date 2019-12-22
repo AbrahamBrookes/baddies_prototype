@@ -4,6 +4,8 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 Vue.use(Vuex)
 
+/* components */
+/* screens */
 import MainMenuScreen from './components/screens/MainMenuScreen';
 Vue.component('main-menu', MainMenuScreen);
 import VillageScreen from './components/screens/VillageScreen';
@@ -18,6 +20,11 @@ import CreateCharacterScreen from './components/screens/CreateCharacterScreen';
 Vue.component('create-character-screen', CreateCharacterScreen);
 import CharacterStatsScreen from './components/screens/CharacterStatsScreen';
 Vue.component('character-stats-screen', CharacterStatsScreen);
+/* elements */
+import EnemyComponent from './components/Enemy';
+Vue.component('enemy', EnemyComponent);
+
+
 import Game from './components/Game';
 
 
@@ -35,7 +42,7 @@ import {all_armour} from './item_libraries/all_armour'
 import {all_shields} from './item_libraries/all_shields'
 import {all_enemies} from './item_libraries/all_enemies'
 
-import {character} from './vuex_modules/character'
+import {PlayerCharacter} from './classes/PlayerCharacter'
 
 export const store = new Vuex.Store({
 	state: {
@@ -45,6 +52,7 @@ export const store = new Vuex.Store({
 		all_armour: all_armour,
 		all_shields: all_shields,
 		all_enemies: all_enemies,
+		player_character: null,
 	},
 	getters: {
 		all_equipment: state => {
@@ -61,12 +69,12 @@ export const store = new Vuex.Store({
 			state.current_screen = screen;
 		},
 		set_character_name( state, name ){
-			state.character.name = name;
+			state.player_character.name = name;
+		},
+		create_new_character( state, playerCharacter ){
+			state.player_character = playerCharacter;
 		}
 	},
-	modules: {
-		character: character
-	}
 });
 
 new Vue({

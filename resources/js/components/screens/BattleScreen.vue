@@ -1,10 +1,6 @@
 <template>
 	<div id=battle-screen>
-		<ul>
-			<li v-for="enemy in all_enemies">
-				{{ enemy.name }}
-			</li>
-		</ul>
+		<enemy :enemy="all_enemies[1]" @attack="attack_player"></enemy>
 		<button class="btn btn-secondary" @click="set_current_screen('VILLAGE_SCREEN')">Back</button>
 	</div>
 </template>
@@ -21,6 +17,9 @@ export default {
 		...mapMutations([
 			'set_current_screen'
 		]),
+		attack_player( attack_values ){
+			console.log( attack_values );
+		}
 	}
 }
 </script>

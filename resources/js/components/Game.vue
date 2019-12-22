@@ -6,7 +6,7 @@
 		<inn-screen v-if="current_screen == 'INN_SCREEN'"></inn-screen>
 		<battle-screen v-if="current_screen == 'BATTLE_SCREEN'"></battle-screen>
 		<create-character-screen v-if="current_screen == 'CREATE_CHARACTER_SCREEN'"></create-character-screen>
-		<character-stats-screen v-if="current_screen == 'CHARACTER_STATS_SCREEN'"></character-stats-screen>
+		<character-stats-screen v-if="current_screen == 'CHARACTER_STATS_SCREEN'" :character="player_character"></character-stats-screen>
 		
 		<button class="btn btn-secondary" 
 			v-if="current_screen != 'MAIN_MENU' && current_screen != 'CHARACTER_STATS_SCREEN' && current_screen != 'CREATE_CHARACTER_SCREEN'"
@@ -21,7 +21,8 @@ export default {
 	name: 'game',
 	computed: {
 		...mapState([
-			'current_screen'
+			'current_screen',
+			'player_character'
 		]),
 	},
 	methods: {

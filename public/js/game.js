@@ -86,6 +86,66 @@
 /************************************************************************/
 /******/ ({
 
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/Enemy.vue?vue&type=script&lang=js&":
+/*!****************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/Enemy.vue?vue&type=script&lang=js& ***!
+  \****************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _classes_Enemy__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../classes/Enemy */ "./resources/js/classes/Enemy.js");
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  props: {
+    enemy: null // the enemy object, passed from the calling component
+
+  },
+  data: function data() {
+    return {
+      styleBinding: {
+        // we're passing in some calculated css variables
+        // to let css handle animations
+        '--attack-speed': this.enemy.speed + 's'
+      },
+      waitingToAttack: false
+    };
+  },
+  methods: {
+    begin_attack_loop: function begin_attack_loop() {
+      var _this = this;
+
+      // initiate an attack, wait for the timer to complete and then attack
+      console.log('attack loop started'); // start a timer based on this.speed
+
+      window.setTimeout(function () {
+        _this.$emit('attack', _this.enemy.attack()); // toggle attacking class off so our css animations will run again
+
+
+        _this.waitingToAttack = false;
+      }, this.enemy.speed * 1000); // change the class so our css animations will run
+
+      this.waitingToAttack = true;
+    }
+  }
+});
+
+/***/ }),
+
 /***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/Game.vue?vue&type=script&lang=js&":
 /*!***************************************************************************************************************************************************************!*\
   !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/Game.vue?vue&type=script&lang=js& ***!
@@ -122,7 +182,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: 'game',
-  computed: _objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapState"])(['current_screen'])),
+  computed: _objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapState"])(['current_screen', 'player_character'])),
   methods: _objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapMutations"])(['set_current_screen']))
 });
 
@@ -151,14 +211,14 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
-//
-//
-//
-//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   computed: _objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapState"])(['all_enemies'])),
-  methods: _objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapMutations"])(['set_current_screen']))
+  methods: _objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapMutations"])(['set_current_screen']), {
+    attack_player: function attack_player(attack_values) {
+      console.log(attack_values);
+    }
+  })
 });
 
 /***/ }),
@@ -208,7 +268,6 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vuex__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");
-/* harmony import */ var _game__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../game */ "./resources/js/game.js");
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -224,15 +283,13 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 
-
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
-      character_name: 'Jangus Jangus Jamilaquarry',
-      character: _game__WEBPACK_IMPORTED_MODULE_1__["store"].state.character
+      character_name: 'Jangus Jangus Jamilaquarry'
     };
   },
-  computed: _objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapState"])(['all_enemies', 'previous_screen'])),
+  computed: _objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapState"])(['previous_screen', 'player_character'])),
   methods: _objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapMutations"])(['set_current_screen', 'set_character_name']))
 });
 
@@ -248,7 +305,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vuex__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");
-/* harmony import */ var _game__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../game */ "./resources/js/game.js");
+/* harmony import */ var _classes_PlayerCharacter__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../classes/PlayerCharacter */ "./resources/js/classes/PlayerCharacter.js");
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -268,20 +325,22 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
-//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
-      character_name: 'Jangus Jangus Jamilaquarry',
-      character: _game__WEBPACK_IMPORTED_MODULE_1__["store"].state.character
+      character_name: 'Jangus Jangus Jamilaquarry'
     };
   },
   computed: _objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapState"])(['all_enemies'])),
-  methods: _objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapMutations"])(['set_current_screen', 'set_character_name']), {
+  methods: _objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapMutations"])(['set_current_screen', 'set_character_name', 'create_new_character']), {
     create_character: function create_character() {
-      this.set_character_name(this.character_name);
+      var new_character = new _classes_PlayerCharacter__WEBPACK_IMPORTED_MODULE_1__["PlayerCharacter"]({
+        name: this.character_name,
+        attack: 1
+      });
+      this.create_new_character(new_character);
       this.set_current_screen('VILLAGE_SCREEN');
     }
   })
@@ -390,6 +449,112 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 /* harmony default export */ __webpack_exports__["default"] = ({
   methods: _objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapMutations"])(['set_current_screen']))
 });
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/Enemy.vue?vue&type=style&index=0&id=d88377a6&scoped=true&lang=scss&":
+/*!***************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--6-2!./node_modules/sass-loader/dist/cjs.js??ref--6-3!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/Enemy.vue?vue&type=style&index=0&id=d88377a6&scoped=true&lang=scss& ***!
+  \***************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loader/lib/css-base.js */ "./node_modules/css-loader/lib/css-base.js")(false);
+// imports
+
+
+// module
+exports.push([module.i, ".enemy .attack-slider[data-v-d88377a6] {\n  height: 20px;\n  width: 100%;\n  background-color: black;\n}\n.enemy.about-to-attack .attack-slider[data-v-d88377a6] {\n  /* \t\n  \tanimation-duration passed from this.data.styleBindings to inline style \n  \tand then used here to handle animation via css depending on our enemy \n  \tobjects speed property \n  */\n  animation-duration: var(--attack-speed);\n  animation-name: attackSlider-data-v-d88377a6;\n  animation-timing-function: linear;\n}\n@keyframes attackSlider-data-v-d88377a6 {\nfrom {\n    width: 100%;\n}\nto {\n    width: 0%;\n}\n}", ""]);
+
+// exports
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/lib/css-base.js":
+/*!*************************************************!*\
+  !*** ./node_modules/css-loader/lib/css-base.js ***!
+  \*************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+/*
+	MIT License http://www.opensource.org/licenses/mit-license.php
+	Author Tobias Koppers @sokra
+*/
+// css base code, injected by the css-loader
+module.exports = function(useSourceMap) {
+	var list = [];
+
+	// return the list of modules as css string
+	list.toString = function toString() {
+		return this.map(function (item) {
+			var content = cssWithMappingToString(item, useSourceMap);
+			if(item[2]) {
+				return "@media " + item[2] + "{" + content + "}";
+			} else {
+				return content;
+			}
+		}).join("");
+	};
+
+	// import a list of modules into the list
+	list.i = function(modules, mediaQuery) {
+		if(typeof modules === "string")
+			modules = [[null, modules, ""]];
+		var alreadyImportedModules = {};
+		for(var i = 0; i < this.length; i++) {
+			var id = this[i][0];
+			if(typeof id === "number")
+				alreadyImportedModules[id] = true;
+		}
+		for(i = 0; i < modules.length; i++) {
+			var item = modules[i];
+			// skip already imported module
+			// this implementation is not 100% perfect for weird media query combinations
+			//  when a module is imported multiple times with different media queries.
+			//  I hope this will never occur (Hey this way we have smaller bundles)
+			if(typeof item[0] !== "number" || !alreadyImportedModules[item[0]]) {
+				if(mediaQuery && !item[2]) {
+					item[2] = mediaQuery;
+				} else if(mediaQuery) {
+					item[2] = "(" + item[2] + ") and (" + mediaQuery + ")";
+				}
+				list.push(item);
+			}
+		}
+	};
+	return list;
+};
+
+function cssWithMappingToString(item, useSourceMap) {
+	var content = item[1] || '';
+	var cssMapping = item[3];
+	if (!cssMapping) {
+		return content;
+	}
+
+	if (useSourceMap && typeof btoa === 'function') {
+		var sourceMapping = toComment(cssMapping);
+		var sourceURLs = cssMapping.sources.map(function (source) {
+			return '/*# sourceURL=' + cssMapping.sourceRoot + source + ' */'
+		});
+
+		return [content].concat(sourceURLs).concat([sourceMapping]).join('\n');
+	}
+
+	return [content].join('\n');
+}
+
+// Adapted from convert-source-map (MIT)
+function toComment(sourceMap) {
+	// eslint-disable-next-line no-undef
+	var base64 = btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap))));
+	var data = 'sourceMappingURL=data:application/json;charset=utf-8;base64,' + base64;
+
+	return '/*# ' + data + ' */';
+}
+
 
 /***/ }),
 
@@ -786,6 +951,545 @@ process.umask = function() { return 0; };
 
 /***/ }),
 
+/***/ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/Enemy.vue?vue&type=style&index=0&id=d88377a6&scoped=true&lang=scss&":
+/*!*******************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/style-loader!./node_modules/css-loader!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--6-2!./node_modules/sass-loader/dist/cjs.js??ref--6-3!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/Enemy.vue?vue&type=style&index=0&id=d88377a6&scoped=true&lang=scss& ***!
+  \*******************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+
+var content = __webpack_require__(/*! !../../../node_modules/css-loader!../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../node_modules/postcss-loader/src??ref--6-2!../../../node_modules/sass-loader/dist/cjs.js??ref--6-3!../../../node_modules/vue-loader/lib??vue-loader-options!./Enemy.vue?vue&type=style&index=0&id=d88377a6&scoped=true&lang=scss& */ "./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/Enemy.vue?vue&type=style&index=0&id=d88377a6&scoped=true&lang=scss&");
+
+if(typeof content === 'string') content = [[module.i, content, '']];
+
+var transform;
+var insertInto;
+
+
+
+var options = {"hmr":true}
+
+options.transform = transform
+options.insertInto = undefined;
+
+var update = __webpack_require__(/*! ../../../node_modules/style-loader/lib/addStyles.js */ "./node_modules/style-loader/lib/addStyles.js")(content, options);
+
+if(content.locals) module.exports = content.locals;
+
+if(false) {}
+
+/***/ }),
+
+/***/ "./node_modules/style-loader/lib/addStyles.js":
+/*!****************************************************!*\
+  !*** ./node_modules/style-loader/lib/addStyles.js ***!
+  \****************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+/*
+	MIT License http://www.opensource.org/licenses/mit-license.php
+	Author Tobias Koppers @sokra
+*/
+
+var stylesInDom = {};
+
+var	memoize = function (fn) {
+	var memo;
+
+	return function () {
+		if (typeof memo === "undefined") memo = fn.apply(this, arguments);
+		return memo;
+	};
+};
+
+var isOldIE = memoize(function () {
+	// Test for IE <= 9 as proposed by Browserhacks
+	// @see http://browserhacks.com/#hack-e71d8692f65334173fee715c222cb805
+	// Tests for existence of standard globals is to allow style-loader
+	// to operate correctly into non-standard environments
+	// @see https://github.com/webpack-contrib/style-loader/issues/177
+	return window && document && document.all && !window.atob;
+});
+
+var getTarget = function (target, parent) {
+  if (parent){
+    return parent.querySelector(target);
+  }
+  return document.querySelector(target);
+};
+
+var getElement = (function (fn) {
+	var memo = {};
+
+	return function(target, parent) {
+                // If passing function in options, then use it for resolve "head" element.
+                // Useful for Shadow Root style i.e
+                // {
+                //   insertInto: function () { return document.querySelector("#foo").shadowRoot }
+                // }
+                if (typeof target === 'function') {
+                        return target();
+                }
+                if (typeof memo[target] === "undefined") {
+			var styleTarget = getTarget.call(this, target, parent);
+			// Special case to return head of iframe instead of iframe itself
+			if (window.HTMLIFrameElement && styleTarget instanceof window.HTMLIFrameElement) {
+				try {
+					// This will throw an exception if access to iframe is blocked
+					// due to cross-origin restrictions
+					styleTarget = styleTarget.contentDocument.head;
+				} catch(e) {
+					styleTarget = null;
+				}
+			}
+			memo[target] = styleTarget;
+		}
+		return memo[target]
+	};
+})();
+
+var singleton = null;
+var	singletonCounter = 0;
+var	stylesInsertedAtTop = [];
+
+var	fixUrls = __webpack_require__(/*! ./urls */ "./node_modules/style-loader/lib/urls.js");
+
+module.exports = function(list, options) {
+	if (typeof DEBUG !== "undefined" && DEBUG) {
+		if (typeof document !== "object") throw new Error("The style-loader cannot be used in a non-browser environment");
+	}
+
+	options = options || {};
+
+	options.attrs = typeof options.attrs === "object" ? options.attrs : {};
+
+	// Force single-tag solution on IE6-9, which has a hard limit on the # of <style>
+	// tags it will allow on a page
+	if (!options.singleton && typeof options.singleton !== "boolean") options.singleton = isOldIE();
+
+	// By default, add <style> tags to the <head> element
+        if (!options.insertInto) options.insertInto = "head";
+
+	// By default, add <style> tags to the bottom of the target
+	if (!options.insertAt) options.insertAt = "bottom";
+
+	var styles = listToStyles(list, options);
+
+	addStylesToDom(styles, options);
+
+	return function update (newList) {
+		var mayRemove = [];
+
+		for (var i = 0; i < styles.length; i++) {
+			var item = styles[i];
+			var domStyle = stylesInDom[item.id];
+
+			domStyle.refs--;
+			mayRemove.push(domStyle);
+		}
+
+		if(newList) {
+			var newStyles = listToStyles(newList, options);
+			addStylesToDom(newStyles, options);
+		}
+
+		for (var i = 0; i < mayRemove.length; i++) {
+			var domStyle = mayRemove[i];
+
+			if(domStyle.refs === 0) {
+				for (var j = 0; j < domStyle.parts.length; j++) domStyle.parts[j]();
+
+				delete stylesInDom[domStyle.id];
+			}
+		}
+	};
+};
+
+function addStylesToDom (styles, options) {
+	for (var i = 0; i < styles.length; i++) {
+		var item = styles[i];
+		var domStyle = stylesInDom[item.id];
+
+		if(domStyle) {
+			domStyle.refs++;
+
+			for(var j = 0; j < domStyle.parts.length; j++) {
+				domStyle.parts[j](item.parts[j]);
+			}
+
+			for(; j < item.parts.length; j++) {
+				domStyle.parts.push(addStyle(item.parts[j], options));
+			}
+		} else {
+			var parts = [];
+
+			for(var j = 0; j < item.parts.length; j++) {
+				parts.push(addStyle(item.parts[j], options));
+			}
+
+			stylesInDom[item.id] = {id: item.id, refs: 1, parts: parts};
+		}
+	}
+}
+
+function listToStyles (list, options) {
+	var styles = [];
+	var newStyles = {};
+
+	for (var i = 0; i < list.length; i++) {
+		var item = list[i];
+		var id = options.base ? item[0] + options.base : item[0];
+		var css = item[1];
+		var media = item[2];
+		var sourceMap = item[3];
+		var part = {css: css, media: media, sourceMap: sourceMap};
+
+		if(!newStyles[id]) styles.push(newStyles[id] = {id: id, parts: [part]});
+		else newStyles[id].parts.push(part);
+	}
+
+	return styles;
+}
+
+function insertStyleElement (options, style) {
+	var target = getElement(options.insertInto)
+
+	if (!target) {
+		throw new Error("Couldn't find a style target. This probably means that the value for the 'insertInto' parameter is invalid.");
+	}
+
+	var lastStyleElementInsertedAtTop = stylesInsertedAtTop[stylesInsertedAtTop.length - 1];
+
+	if (options.insertAt === "top") {
+		if (!lastStyleElementInsertedAtTop) {
+			target.insertBefore(style, target.firstChild);
+		} else if (lastStyleElementInsertedAtTop.nextSibling) {
+			target.insertBefore(style, lastStyleElementInsertedAtTop.nextSibling);
+		} else {
+			target.appendChild(style);
+		}
+		stylesInsertedAtTop.push(style);
+	} else if (options.insertAt === "bottom") {
+		target.appendChild(style);
+	} else if (typeof options.insertAt === "object" && options.insertAt.before) {
+		var nextSibling = getElement(options.insertAt.before, target);
+		target.insertBefore(style, nextSibling);
+	} else {
+		throw new Error("[Style Loader]\n\n Invalid value for parameter 'insertAt' ('options.insertAt') found.\n Must be 'top', 'bottom', or Object.\n (https://github.com/webpack-contrib/style-loader#insertat)\n");
+	}
+}
+
+function removeStyleElement (style) {
+	if (style.parentNode === null) return false;
+	style.parentNode.removeChild(style);
+
+	var idx = stylesInsertedAtTop.indexOf(style);
+	if(idx >= 0) {
+		stylesInsertedAtTop.splice(idx, 1);
+	}
+}
+
+function createStyleElement (options) {
+	var style = document.createElement("style");
+
+	if(options.attrs.type === undefined) {
+		options.attrs.type = "text/css";
+	}
+
+	if(options.attrs.nonce === undefined) {
+		var nonce = getNonce();
+		if (nonce) {
+			options.attrs.nonce = nonce;
+		}
+	}
+
+	addAttrs(style, options.attrs);
+	insertStyleElement(options, style);
+
+	return style;
+}
+
+function createLinkElement (options) {
+	var link = document.createElement("link");
+
+	if(options.attrs.type === undefined) {
+		options.attrs.type = "text/css";
+	}
+	options.attrs.rel = "stylesheet";
+
+	addAttrs(link, options.attrs);
+	insertStyleElement(options, link);
+
+	return link;
+}
+
+function addAttrs (el, attrs) {
+	Object.keys(attrs).forEach(function (key) {
+		el.setAttribute(key, attrs[key]);
+	});
+}
+
+function getNonce() {
+	if (false) {}
+
+	return __webpack_require__.nc;
+}
+
+function addStyle (obj, options) {
+	var style, update, remove, result;
+
+	// If a transform function was defined, run it on the css
+	if (options.transform && obj.css) {
+	    result = typeof options.transform === 'function'
+		 ? options.transform(obj.css) 
+		 : options.transform.default(obj.css);
+
+	    if (result) {
+	    	// If transform returns a value, use that instead of the original css.
+	    	// This allows running runtime transformations on the css.
+	    	obj.css = result;
+	    } else {
+	    	// If the transform function returns a falsy value, don't add this css.
+	    	// This allows conditional loading of css
+	    	return function() {
+	    		// noop
+	    	};
+	    }
+	}
+
+	if (options.singleton) {
+		var styleIndex = singletonCounter++;
+
+		style = singleton || (singleton = createStyleElement(options));
+
+		update = applyToSingletonTag.bind(null, style, styleIndex, false);
+		remove = applyToSingletonTag.bind(null, style, styleIndex, true);
+
+	} else if (
+		obj.sourceMap &&
+		typeof URL === "function" &&
+		typeof URL.createObjectURL === "function" &&
+		typeof URL.revokeObjectURL === "function" &&
+		typeof Blob === "function" &&
+		typeof btoa === "function"
+	) {
+		style = createLinkElement(options);
+		update = updateLink.bind(null, style, options);
+		remove = function () {
+			removeStyleElement(style);
+
+			if(style.href) URL.revokeObjectURL(style.href);
+		};
+	} else {
+		style = createStyleElement(options);
+		update = applyToTag.bind(null, style);
+		remove = function () {
+			removeStyleElement(style);
+		};
+	}
+
+	update(obj);
+
+	return function updateStyle (newObj) {
+		if (newObj) {
+			if (
+				newObj.css === obj.css &&
+				newObj.media === obj.media &&
+				newObj.sourceMap === obj.sourceMap
+			) {
+				return;
+			}
+
+			update(obj = newObj);
+		} else {
+			remove();
+		}
+	};
+}
+
+var replaceText = (function () {
+	var textStore = [];
+
+	return function (index, replacement) {
+		textStore[index] = replacement;
+
+		return textStore.filter(Boolean).join('\n');
+	};
+})();
+
+function applyToSingletonTag (style, index, remove, obj) {
+	var css = remove ? "" : obj.css;
+
+	if (style.styleSheet) {
+		style.styleSheet.cssText = replaceText(index, css);
+	} else {
+		var cssNode = document.createTextNode(css);
+		var childNodes = style.childNodes;
+
+		if (childNodes[index]) style.removeChild(childNodes[index]);
+
+		if (childNodes.length) {
+			style.insertBefore(cssNode, childNodes[index]);
+		} else {
+			style.appendChild(cssNode);
+		}
+	}
+}
+
+function applyToTag (style, obj) {
+	var css = obj.css;
+	var media = obj.media;
+
+	if(media) {
+		style.setAttribute("media", media)
+	}
+
+	if(style.styleSheet) {
+		style.styleSheet.cssText = css;
+	} else {
+		while(style.firstChild) {
+			style.removeChild(style.firstChild);
+		}
+
+		style.appendChild(document.createTextNode(css));
+	}
+}
+
+function updateLink (link, options, obj) {
+	var css = obj.css;
+	var sourceMap = obj.sourceMap;
+
+	/*
+		If convertToAbsoluteUrls isn't defined, but sourcemaps are enabled
+		and there is no publicPath defined then lets turn convertToAbsoluteUrls
+		on by default.  Otherwise default to the convertToAbsoluteUrls option
+		directly
+	*/
+	var autoFixUrls = options.convertToAbsoluteUrls === undefined && sourceMap;
+
+	if (options.convertToAbsoluteUrls || autoFixUrls) {
+		css = fixUrls(css);
+	}
+
+	if (sourceMap) {
+		// http://stackoverflow.com/a/26603875
+		css += "\n/*# sourceMappingURL=data:application/json;base64," + btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap)))) + " */";
+	}
+
+	var blob = new Blob([css], { type: "text/css" });
+
+	var oldSrc = link.href;
+
+	link.href = URL.createObjectURL(blob);
+
+	if(oldSrc) URL.revokeObjectURL(oldSrc);
+}
+
+
+/***/ }),
+
+/***/ "./node_modules/style-loader/lib/urls.js":
+/*!***********************************************!*\
+  !*** ./node_modules/style-loader/lib/urls.js ***!
+  \***********************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+
+/**
+ * When source maps are enabled, `style-loader` uses a link element with a data-uri to
+ * embed the css on the page. This breaks all relative urls because now they are relative to a
+ * bundle instead of the current page.
+ *
+ * One solution is to only use full urls, but that may be impossible.
+ *
+ * Instead, this function "fixes" the relative urls to be absolute according to the current page location.
+ *
+ * A rudimentary test suite is located at `test/fixUrls.js` and can be run via the `npm test` command.
+ *
+ */
+
+module.exports = function (css) {
+  // get current location
+  var location = typeof window !== "undefined" && window.location;
+
+  if (!location) {
+    throw new Error("fixUrls requires window.location");
+  }
+
+	// blank or null?
+	if (!css || typeof css !== "string") {
+	  return css;
+  }
+
+  var baseUrl = location.protocol + "//" + location.host;
+  var currentDir = baseUrl + location.pathname.replace(/\/[^\/]*$/, "/");
+
+	// convert each url(...)
+	/*
+	This regular expression is just a way to recursively match brackets within
+	a string.
+
+	 /url\s*\(  = Match on the word "url" with any whitespace after it and then a parens
+	   (  = Start a capturing group
+	     (?:  = Start a non-capturing group
+	         [^)(]  = Match anything that isn't a parentheses
+	         |  = OR
+	         \(  = Match a start parentheses
+	             (?:  = Start another non-capturing groups
+	                 [^)(]+  = Match anything that isn't a parentheses
+	                 |  = OR
+	                 \(  = Match a start parentheses
+	                     [^)(]*  = Match anything that isn't a parentheses
+	                 \)  = Match a end parentheses
+	             )  = End Group
+              *\) = Match anything and then a close parens
+          )  = Close non-capturing group
+          *  = Match anything
+       )  = Close capturing group
+	 \)  = Match a close parens
+
+	 /gi  = Get all matches, not the first.  Be case insensitive.
+	 */
+	var fixedCss = css.replace(/url\s*\(((?:[^)(]|\((?:[^)(]+|\([^)(]*\))*\))*)\)/gi, function(fullMatch, origUrl) {
+		// strip quotes (if they exist)
+		var unquotedOrigUrl = origUrl
+			.trim()
+			.replace(/^"(.*)"$/, function(o, $1){ return $1; })
+			.replace(/^'(.*)'$/, function(o, $1){ return $1; });
+
+		// already a full url? no change
+		if (/^(#|data:|http:\/\/|https:\/\/|file:\/\/\/|\s*$)/i.test(unquotedOrigUrl)) {
+		  return fullMatch;
+		}
+
+		// convert the url to a full url
+		var newUrl;
+
+		if (unquotedOrigUrl.indexOf("//") === 0) {
+		  	//TODO: should we add protocol?
+			newUrl = unquotedOrigUrl;
+		} else if (unquotedOrigUrl.indexOf("/") === 0) {
+			// path should be relative to the base url
+			newUrl = baseUrl + unquotedOrigUrl; // already starts with '/'
+		} else {
+			// path should be relative to current directory
+			newUrl = currentDir + unquotedOrigUrl.replace(/^\.\//, ""); // Strip leading './'
+		}
+
+		// send back the fixed url(...)
+		return "url(" + JSON.stringify(newUrl) + ")";
+	});
+
+	// send back the fixed css
+	return fixedCss;
+};
+
+
+/***/ }),
+
 /***/ "./node_modules/timers-browserify/main.js":
 /*!************************************************!*\
   !*** ./node_modules/timers-browserify/main.js ***!
@@ -861,6 +1565,39 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
 
 /***/ }),
 
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/Enemy.vue?vue&type=template&id=d88377a6&scoped=true&":
+/*!********************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/Enemy.vue?vue&type=template&id=d88377a6&scoped=true& ***!
+  \********************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c(
+    "div",
+    {
+      staticClass: "enemy",
+      class: { "about-to-attack": _vm.waitingToAttack },
+      style: _vm.styleBinding,
+      on: { click: _vm.begin_attack_loop }
+    },
+    [_c("div", { staticClass: "attack-slider" })]
+  )
+}
+var staticRenderFns = []
+render._withStripped = true
+
+
+
+/***/ }),
+
 /***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/Game.vue?vue&type=template&id=3a2c79dd&":
 /*!*******************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/Game.vue?vue&type=template&id=3a2c79dd& ***!
@@ -897,7 +1634,9 @@ var render = function() {
         : _vm._e(),
       _vm._v(" "),
       _vm.current_screen == "CHARACTER_STATS_SCREEN"
-        ? _c("character-stats-screen")
+        ? _c("character-stats-screen", {
+            attrs: { character: _vm.player_character }
+          })
         : _vm._e(),
       _vm._v(" "),
       _vm.current_screen != "MAIN_MENU" &&
@@ -942,28 +1681,30 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", { attrs: { id: "battle-screen" } }, [
-    _c(
-      "ul",
-      _vm._l(_vm.all_enemies, function(enemy) {
-        return _c("li", [_vm._v("\n\t\t\t" + _vm._s(enemy.name) + "\n\t\t")])
+  return _c(
+    "div",
+    { attrs: { id: "battle-screen" } },
+    [
+      _c("enemy", {
+        attrs: { enemy: _vm.all_enemies[1] },
+        on: { attack: _vm.attack_player }
       }),
-      0
-    ),
-    _vm._v(" "),
-    _c(
-      "button",
-      {
-        staticClass: "btn btn-secondary",
-        on: {
-          click: function($event) {
-            return _vm.set_current_screen("VILLAGE_SCREEN")
+      _vm._v(" "),
+      _c(
+        "button",
+        {
+          staticClass: "btn btn-secondary",
+          on: {
+            click: function($event) {
+              return _vm.set_current_screen("VILLAGE_SCREEN")
+            }
           }
-        }
-      },
-      [_vm._v("Back")]
-    )
-  ])
+        },
+        [_vm._v("Back")]
+      )
+    ],
+    1
+  )
 }
 var staticRenderFns = []
 render._withStripped = true
@@ -1041,7 +1782,7 @@ var render = function() {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c("div", { attrs: { id: "create-character-screen" } }, [
-    _vm._v("\n\t" + _vm._s(_vm.character.name) + "\n\t\t\n\t"),
+    _vm._v("\n\t" + _vm._s(_vm.player_character.name) + "\n\t\t\n\t"),
     _c(
       "button",
       {
@@ -1105,7 +1846,7 @@ var render = function() {
         }
       })
     ]),
-    _vm._v("\n\t" + _vm._s(_vm.character.name) + "\n\t\t\n\t"),
+    _vm._v(" "),
     _c(
       "button",
       { staticClass: "btn btn-secondary", on: { click: _vm.create_character } },
@@ -14513,6 +15254,66 @@ function (_Item) {
 
 /***/ }),
 
+/***/ "./resources/js/classes/Battleable.js":
+/*!********************************************!*\
+  !*** ./resources/js/classes/Battleable.js ***!
+  \********************************************/
+/*! exports provided: Battleable */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Battleable", function() { return Battleable; });
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+/**
+	A base class for anything that can attack or be attacked, including enemies and the player
+*/
+var Battleable =
+/*#__PURE__*/
+function () {
+  function Battleable(init) {
+    _classCallCheck(this, Battleable);
+
+    this.health_stat = init.health || 1;
+    this.defense_stat = init.defense || 1; // attack is handled with different types of damage - physical, magical, fire, electric etc
+    // so if we are handed a simple number for attack, it's simply physical damage. Otherwise the
+    // passed in object will specifically set different damage types
+
+    if (typeof init.attack == 'number') {
+      this.attack_stat = {
+        physical: init.attack
+      };
+    } else {
+      if (_typeof(init.attack) != 'object') throw "Please assign a proper attack type to enemy";
+      this.attack_stat = init.attack;
+    }
+  }
+  /**
+  	Sends an attack signal, in the form of a returned object containing information about
+  	the different types of damage this attack shall deliver. All randomization and status
+  	effects shall be handled in this method before sending out the signal.
+  */
+
+
+  _createClass(Battleable, [{
+    key: "attack",
+    value: function attack() {
+      return this.attack_stat;
+    }
+  }]);
+
+  return Battleable;
+}();
+
+/***/ }),
+
 /***/ "./resources/js/classes/Enemy.js":
 /*!***************************************!*\
   !*** ./resources/js/classes/Enemy.js ***!
@@ -14523,17 +15324,55 @@ function (_Item) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Enemy", function() { return Enemy; });
+/* harmony import */ var _Battleable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Battleable */ "./resources/js/classes/Battleable.js");
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var Enemy = function Enemy(init) {
-  _classCallCheck(this, Enemy);
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
-  this.name = init.name || 'Untitled Enemy';
-  this.health = init.health || 1;
-  this.attack = init.attack || 1;
-  this.defense = init.defense || 1;
-  this.speed = init.speed || 1;
-};
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+
+var Enemy =
+/*#__PURE__*/
+function (_Battleable) {
+  _inherits(Enemy, _Battleable);
+
+  function Enemy(init) {
+    var _this;
+
+    _classCallCheck(this, Enemy);
+
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(Enemy).call(this, init));
+    _this.name = init.name || 'Untitled Enemy';
+    _this.speed_stat = init.speed || 1; // attack timer - larger is slower
+
+    return _this;
+  }
+
+  _createClass(Enemy, [{
+    key: "speed",
+    get: function get() {
+      return this.speed_stat;
+    },
+    set: function set(value) {
+      this.speed_stat = value;
+    }
+  }]);
+
+  return Enemy;
+}(_Battleable__WEBPACK_IMPORTED_MODULE_0__["Battleable"]);
 
 /***/ }),
 
@@ -14559,6 +15398,84 @@ var Item = function Item(init) {
   this.name = init.name || 'Untitled Item';
   this.price = init.price || 0;
 };
+
+/***/ }),
+
+/***/ "./resources/js/classes/PlayerCharacter.js":
+/*!*************************************************!*\
+  !*** ./resources/js/classes/PlayerCharacter.js ***!
+  \*************************************************/
+/*! exports provided: PlayerCharacter */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "PlayerCharacter", function() { return PlayerCharacter; });
+/* harmony import */ var _Battleable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Battleable */ "./resources/js/classes/Battleable.js");
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+
+var PlayerCharacter =
+/*#__PURE__*/
+function (_Battleable) {
+  _inherits(PlayerCharacter, _Battleable);
+
+  function PlayerCharacter(init) {
+    var _this;
+
+    _classCallCheck(this, PlayerCharacter);
+
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(PlayerCharacter).call(this, init));
+    _this.name = init.name || 'Untitled Character';
+    _this.level_stat = init.level || 1;
+    _this.dexterity = init.dexterity || 1; // critical hit chance, dodging, landing hits
+
+    _this.vitality = init.vitality || 1; // stamina total and recovery, movement speed
+
+    _this.strength = init.strength || 1; // health, attack, heavier gear, encumberance
+
+    _this.intelligence = init.intelligence || 1; // mana total and recovery, high level spells
+
+    _this.willpower = init.willpower || 1; // magic attack and defense, magical accuracy
+
+    return _this;
+  }
+
+  _createClass(PlayerCharacter, [{
+    key: "stats",
+    get: function get() {
+      return {
+        level: this.level_stat,
+        health: this.health_stat,
+        defense: this.defense_stat,
+        attack: this.attack_stat,
+        dexterity: this.dexterity,
+        vitality: this.vitality,
+        strength: this.strength,
+        intelligence: this.intelligence,
+        willpower: this.willpower
+      };
+    }
+  }]);
+
+  return PlayerCharacter;
+}(_Battleable__WEBPACK_IMPORTED_MODULE_0__["Battleable"]);
 
 /***/ }),
 
@@ -14659,6 +15576,94 @@ function (_Item) {
 
   return Weapon;
 }(_Item__WEBPACK_IMPORTED_MODULE_0__["Item"]);
+
+/***/ }),
+
+/***/ "./resources/js/components/Enemy.vue":
+/*!*******************************************!*\
+  !*** ./resources/js/components/Enemy.vue ***!
+  \*******************************************/
+/*! no static exports found */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _Enemy_vue_vue_type_template_id_d88377a6_scoped_true___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Enemy.vue?vue&type=template&id=d88377a6&scoped=true& */ "./resources/js/components/Enemy.vue?vue&type=template&id=d88377a6&scoped=true&");
+/* harmony import */ var _Enemy_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Enemy.vue?vue&type=script&lang=js& */ "./resources/js/components/Enemy.vue?vue&type=script&lang=js&");
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _Enemy_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _Enemy_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+/* harmony import */ var _Enemy_vue_vue_type_style_index_0_id_d88377a6_scoped_true_lang_scss___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Enemy.vue?vue&type=style&index=0&id=d88377a6&scoped=true&lang=scss& */ "./resources/js/components/Enemy.vue?vue&type=style&index=0&id=d88377a6&scoped=true&lang=scss&");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
+  _Enemy_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _Enemy_vue_vue_type_template_id_d88377a6_scoped_true___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _Enemy_vue_vue_type_template_id_d88377a6_scoped_true___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  "d88377a6",
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/Enemy.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/Enemy.vue?vue&type=script&lang=js&":
+/*!********************************************************************!*\
+  !*** ./resources/js/components/Enemy.vue?vue&type=script&lang=js& ***!
+  \********************************************************************/
+/*! no static exports found */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_Enemy_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/babel-loader/lib??ref--4-0!../../../node_modules/vue-loader/lib??vue-loader-options!./Enemy.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/Enemy.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_Enemy_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/Enemy.vue?vue&type=style&index=0&id=d88377a6&scoped=true&lang=scss&":
+/*!*****************************************************************************************************!*\
+  !*** ./resources/js/components/Enemy.vue?vue&type=style&index=0&id=d88377a6&scoped=true&lang=scss& ***!
+  \*****************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_sass_loader_dist_cjs_js_ref_6_3_node_modules_vue_loader_lib_index_js_vue_loader_options_Enemy_vue_vue_type_style_index_0_id_d88377a6_scoped_true_lang_scss___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/style-loader!../../../node_modules/css-loader!../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../node_modules/postcss-loader/src??ref--6-2!../../../node_modules/sass-loader/dist/cjs.js??ref--6-3!../../../node_modules/vue-loader/lib??vue-loader-options!./Enemy.vue?vue&type=style&index=0&id=d88377a6&scoped=true&lang=scss& */ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/Enemy.vue?vue&type=style&index=0&id=d88377a6&scoped=true&lang=scss&");
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_sass_loader_dist_cjs_js_ref_6_3_node_modules_vue_loader_lib_index_js_vue_loader_options_Enemy_vue_vue_type_style_index_0_id_d88377a6_scoped_true_lang_scss___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_sass_loader_dist_cjs_js_ref_6_3_node_modules_vue_loader_lib_index_js_vue_loader_options_Enemy_vue_vue_type_style_index_0_id_d88377a6_scoped_true_lang_scss___WEBPACK_IMPORTED_MODULE_0__);
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_sass_loader_dist_cjs_js_ref_6_3_node_modules_vue_loader_lib_index_js_vue_loader_options_Enemy_vue_vue_type_style_index_0_id_d88377a6_scoped_true_lang_scss___WEBPACK_IMPORTED_MODULE_0__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_sass_loader_dist_cjs_js_ref_6_3_node_modules_vue_loader_lib_index_js_vue_loader_options_Enemy_vue_vue_type_style_index_0_id_d88377a6_scoped_true_lang_scss___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_sass_loader_dist_cjs_js_ref_6_3_node_modules_vue_loader_lib_index_js_vue_loader_options_Enemy_vue_vue_type_style_index_0_id_d88377a6_scoped_true_lang_scss___WEBPACK_IMPORTED_MODULE_0___default.a); 
+
+/***/ }),
+
+/***/ "./resources/js/components/Enemy.vue?vue&type=template&id=d88377a6&scoped=true&":
+/*!**************************************************************************************!*\
+  !*** ./resources/js/components/Enemy.vue?vue&type=template&id=d88377a6&scoped=true& ***!
+  \**************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Enemy_vue_vue_type_template_id_d88377a6_scoped_true___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../node_modules/vue-loader/lib??vue-loader-options!./Enemy.vue?vue&type=template&id=d88377a6&scoped=true& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/Enemy.vue?vue&type=template&id=d88377a6&scoped=true&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Enemy_vue_vue_type_template_id_d88377a6_scoped_true___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Enemy_vue_vue_type_template_id_d88377a6_scoped_true___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
 
 /***/ }),
 
@@ -15234,21 +16239,26 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _components_screens_BattleScreen__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./components/screens/BattleScreen */ "./resources/js/components/screens/BattleScreen.vue");
 /* harmony import */ var _components_screens_CreateCharacterScreen__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./components/screens/CreateCharacterScreen */ "./resources/js/components/screens/CreateCharacterScreen.vue");
 /* harmony import */ var _components_screens_CharacterStatsScreen__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./components/screens/CharacterStatsScreen */ "./resources/js/components/screens/CharacterStatsScreen.vue");
-/* harmony import */ var _components_Game__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./components/Game */ "./resources/js/components/Game.vue");
-/* harmony import */ var _classes_Enemy__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./classes/Enemy */ "./resources/js/classes/Enemy.js");
-/* harmony import */ var _classes_Item__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./classes/Item */ "./resources/js/classes/Item.js");
-/* harmony import */ var _classes_Weapon__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./classes/Weapon */ "./resources/js/classes/Weapon.js");
-/* harmony import */ var _classes_Armour__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./classes/Armour */ "./resources/js/classes/Armour.js");
-/* harmony import */ var _classes_Shield__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./classes/Shield */ "./resources/js/classes/Shield.js");
-/* harmony import */ var _item_libraries_all_weapons__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./item_libraries/all_weapons */ "./resources/js/item_libraries/all_weapons.js");
-/* harmony import */ var _item_libraries_all_armour__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./item_libraries/all_armour */ "./resources/js/item_libraries/all_armour.js");
-/* harmony import */ var _item_libraries_all_shields__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ./item_libraries/all_shields */ "./resources/js/item_libraries/all_shields.js");
-/* harmony import */ var _item_libraries_all_enemies__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ./item_libraries/all_enemies */ "./resources/js/item_libraries/all_enemies.js");
-/* harmony import */ var _vuex_modules_character__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! ./vuex_modules/character */ "./resources/js/vuex_modules/character.js");
+/* harmony import */ var _components_Enemy__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./components/Enemy */ "./resources/js/components/Enemy.vue");
+/* harmony import */ var _components_Game__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./components/Game */ "./resources/js/components/Game.vue");
+/* harmony import */ var _classes_Enemy__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./classes/Enemy */ "./resources/js/classes/Enemy.js");
+/* harmony import */ var _classes_Item__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./classes/Item */ "./resources/js/classes/Item.js");
+/* harmony import */ var _classes_Weapon__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./classes/Weapon */ "./resources/js/classes/Weapon.js");
+/* harmony import */ var _classes_Armour__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./classes/Armour */ "./resources/js/classes/Armour.js");
+/* harmony import */ var _classes_Shield__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./classes/Shield */ "./resources/js/classes/Shield.js");
+/* harmony import */ var _item_libraries_all_weapons__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./item_libraries/all_weapons */ "./resources/js/item_libraries/all_weapons.js");
+/* harmony import */ var _item_libraries_all_armour__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ./item_libraries/all_armour */ "./resources/js/item_libraries/all_armour.js");
+/* harmony import */ var _item_libraries_all_shields__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ./item_libraries/all_shields */ "./resources/js/item_libraries/all_shields.js");
+/* harmony import */ var _item_libraries_all_enemies__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! ./item_libraries/all_enemies */ "./resources/js/item_libraries/all_enemies.js");
+/* harmony import */ var _classes_PlayerCharacter__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! ./classes/PlayerCharacter */ "./resources/js/classes/PlayerCharacter.js");
 /* setting up dependencies */
 
 
 vue__WEBPACK_IMPORTED_MODULE_0___default.a.use(vuex__WEBPACK_IMPORTED_MODULE_1__["default"]);
+/* components */
+
+/* screens */
+
 
 vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('main-menu', _components_screens_MainMenuScreen__WEBPACK_IMPORTED_MODULE_2__["default"]);
 
@@ -15263,6 +16273,10 @@ vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('battle-screen', _component
 vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('create-character-screen', _components_screens_CreateCharacterScreen__WEBPACK_IMPORTED_MODULE_7__["default"]);
 
 vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('character-stats-screen', _components_screens_CharacterStatsScreen__WEBPACK_IMPORTED_MODULE_8__["default"]);
+/* elements */
+
+
+vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('enemy', _components_Enemy__WEBPACK_IMPORTED_MODULE_9__["default"]);
 
 /* end dependencies */
 
@@ -15282,10 +16296,11 @@ var store = new vuex__WEBPACK_IMPORTED_MODULE_1__["default"].Store({
   state: {
     current_screen: 'MAIN_MENU',
     previous_screen: '',
-    all_weapons: _item_libraries_all_weapons__WEBPACK_IMPORTED_MODULE_15__["all_weapons"],
-    all_armour: _item_libraries_all_armour__WEBPACK_IMPORTED_MODULE_16__["all_armour"],
-    all_shields: _item_libraries_all_shields__WEBPACK_IMPORTED_MODULE_17__["all_shields"],
-    all_enemies: _item_libraries_all_enemies__WEBPACK_IMPORTED_MODULE_18__["all_enemies"]
+    all_weapons: _item_libraries_all_weapons__WEBPACK_IMPORTED_MODULE_16__["all_weapons"],
+    all_armour: _item_libraries_all_armour__WEBPACK_IMPORTED_MODULE_17__["all_armour"],
+    all_shields: _item_libraries_all_shields__WEBPACK_IMPORTED_MODULE_18__["all_shields"],
+    all_enemies: _item_libraries_all_enemies__WEBPACK_IMPORTED_MODULE_19__["all_enemies"],
+    player_character: null
   },
   getters: {
     all_equipment: function all_equipment(state) {
@@ -15308,18 +16323,18 @@ var store = new vuex__WEBPACK_IMPORTED_MODULE_1__["default"].Store({
       state.current_screen = screen;
     },
     set_character_name: function set_character_name(state, name) {
-      state.character.name = name;
+      state.player_character.name = name;
+    },
+    create_new_character: function create_new_character(state, playerCharacter) {
+      state.player_character = playerCharacter;
     }
-  },
-  modules: {
-    character: _vuex_modules_character__WEBPACK_IMPORTED_MODULE_19__["character"]
   }
 });
 new vue__WEBPACK_IMPORTED_MODULE_0___default.a({
   el: '#game',
   store: store,
   render: function render(h) {
-    return h(_components_Game__WEBPACK_IMPORTED_MODULE_9__["default"]);
+    return h(_components_Game__WEBPACK_IMPORTED_MODULE_10__["default"]);
   }
 });
 
@@ -15374,19 +16389,19 @@ __webpack_require__.r(__webpack_exports__);
 var all_enemies = [new _classes_Enemy__WEBPACK_IMPORTED_MODULE_0__["Enemy"]({
   name: 'Wet Rat',
   health: 5,
-  atack: 0.1,
+  attack: 0.1,
   defense: 0.2,
-  speed: 1.5
+  speed: 5
 }), new _classes_Enemy__WEBPACK_IMPORTED_MODULE_0__["Enemy"]({
   name: 'Flappy Bat',
   health: 5,
-  atack: 0.1,
+  attack: 0.1,
   defense: 0.2,
   speed: 0.5
 }), new _classes_Enemy__WEBPACK_IMPORTED_MODULE_0__["Enemy"]({
   name: 'Irate Frog',
   health: 15,
-  atack: 0.25,
+  attack: 0.25,
   defense: 0.5,
   speed: 1
 })];
@@ -15445,33 +16460,6 @@ var all_weapons = [new _classes_Weapon__WEBPACK_IMPORTED_MODULE_0__["Weapon"]({
   price: 120,
   wpn_type: 'SHORT_SWORD'
 })];
-
-/***/ }),
-
-/***/ "./resources/js/vuex_modules/character.js":
-/*!************************************************!*\
-  !*** ./resources/js/vuex_modules/character.js ***!
-  \************************************************/
-/*! exports provided: character */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "character", function() { return character; });
-var character = {
-  namespaced: true,
-  state: {
-    name: '',
-    level: 1,
-    money: 0
-  },
-  getters: {},
-  mutations: {
-    set_name: function set_name(state, name) {
-      state.name = name;
-    }
-  }
-};
 
 /***/ }),
 
