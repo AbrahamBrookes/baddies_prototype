@@ -5,6 +5,10 @@
 		:style="styleBinding"
 		@click="begin_attack_loop"
 	>
+		<ul class=enemy-stats>
+			<li><h6>{{enemy.name}}</h6></li>
+			<li>Health: {{ enemy.health_stat }}</li>
+		</ul>
 		<div class=attack-slider>
 		</div>
 		
@@ -28,14 +32,19 @@ export default {
 	},
 	methods: {
 		begin_attack_loop(){ // initiate an attack, wait for the timer to complete and then attack
+			// check that the enemy is still alive
+			if( ! this.enemy.can_attack ) return;
 			console.log('attack loop started');
 			// start a timer based on this.speed
 			window.setTimeout(() => {
 			
-				this.$emit('attack', this.enemy.attack());
+				this.$emit('attack', this.enemy.attack()); // send an attack event with this enemy's attack values
 				
 				// toggle attacking class off so our css animations will run again
 				this.waitingToAttack = false;
+				window.requestAnimationFrame(() => {
+					this.begin_attack_loop();
+				});
 				
 			}, this.enemy.speed * 1000);
 			

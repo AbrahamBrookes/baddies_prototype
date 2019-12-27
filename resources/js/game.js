@@ -20,6 +20,10 @@ import CreateCharacterScreen from './components/screens/CreateCharacterScreen';
 Vue.component('create-character-screen', CreateCharacterScreen);
 import CharacterStatsScreen from './components/screens/CharacterStatsScreen';
 Vue.component('character-stats-screen', CharacterStatsScreen);
+import InventoryScreen from './components/screens/InventoryScreen';
+Vue.component('inventory-screen', InventoryScreen);
+import GameOverScreen from './components/screens/GameOverScreen';
+Vue.component('game-over-screen', GameOverScreen);
 /* elements */
 import EnemyComponent from './components/Enemy';
 Vue.component('enemy', EnemyComponent);
@@ -46,6 +50,7 @@ import {PlayerCharacter} from './classes/PlayerCharacter'
 
 export const store = new Vuex.Store({
 	state: {
+		version: '0.0.1',
 		current_screen: 'MAIN_MENU',
 		previous_screen: '',
 		all_weapons: all_weapons,

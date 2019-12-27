@@ -5,6 +5,8 @@ export class Enemy extends Battleable {
 		super(init);
 		this.name = init.name 					|| 'Untitled Enemy';
 		this.speed_stat = init.speed			|| 1; // attack timer - larger is slower
+
+		this.can_attack = false; // a toggle for the enemy attacking
 	}
 	
 	get speed(){
@@ -13,5 +15,6 @@ export class Enemy extends Battleable {
 	set speed( value ){
 		this.speed_stat = value;
 	}
+	
 	
 }

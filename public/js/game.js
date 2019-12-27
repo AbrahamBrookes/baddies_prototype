@@ -109,6 +109,10 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: {
@@ -130,13 +134,19 @@ __webpack_require__.r(__webpack_exports__);
       var _this = this;
 
       // initiate an attack, wait for the timer to complete and then attack
+      // check that the enemy is still alive
+      if (!this.enemy.can_attack) return;
       console.log('attack loop started'); // start a timer based on this.speed
 
       window.setTimeout(function () {
-        _this.$emit('attack', _this.enemy.attack()); // toggle attacking class off so our css animations will run again
+        _this.$emit('attack', _this.enemy.attack()); // send an attack event with this enemy's attack values
+        // toggle attacking class off so our css animations will run again
 
 
         _this.waitingToAttack = false;
+        window.requestAnimationFrame(function () {
+          _this.begin_attack_loop();
+        });
       }, this.enemy.speed * 1000); // change the class so our css animations will run
 
       this.waitingToAttack = true;
@@ -179,10 +189,29 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: 'game',
-  computed: _objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapState"])(['current_screen', 'player_character'])),
+  computed: _objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapState"])(['current_screen', 'player_character', 'version'])),
   methods: _objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapMutations"])(['set_current_screen']))
 });
 
@@ -198,6 +227,14 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vuex__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
+
+function _iterableToArrayLimit(arr, i) { if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) { return; } var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -211,14 +248,128 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
-  computed: _objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapState"])(['all_enemies'])),
+  data: function data() {
+    return {
+      enemy: null,
+      // our enemy class object
+      shield_is_up: false // hold the 'Defend' button to put your shield up
+
+    };
+  },
+  computed: _objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapState"])(['all_enemies', 'player_character'])),
   methods: _objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapMutations"])(['set_current_screen']), {
+    /**
+    	Called from the Enemy, to attack the player character
+    */
     attack_player: function attack_player(attack_values) {
-      console.log(attack_values);
+      // loop through our attack values to marry up the different attack types with defense types
+      for (var _i = 0, _Object$entries = Object.entries(attack_values); _i < _Object$entries.length; _i++) {
+        var _Object$entries$_i = _slicedToArray(_Object$entries[_i], 2),
+            type = _Object$entries$_i[0],
+            value = _Object$entries$_i[1];
+
+        if (type == 'physical' && value > 0) {
+          // physical atack
+          var dmg = value; // take into account armour and shield
+          // shield first
+
+          if (this.shield_is_up) {
+            // a shield will take the damage into its repair value
+            var dmg_before_shield = dmg;
+            dmg -= this.player_character.shield.defense;
+
+            if (dmg >= this.player_character.shield.defense) {
+              // there is still damage left over after the shield
+              // take the full shield defense value into repair
+              this.player_character.shield.take_damage(this.player_character.shield.defense);
+            } else {
+              // only take the damage dealt, not the full shield defense
+              this.player_character.shield.take_damage(dmg_before_shield);
+            }
+          } // then armour
+
+
+          dmg -= this.player_character.getTotalArmourRating(); // then character defense
+
+          dmg -= this.player_character.defense_stat;
+          dmg = dmg < 0 ? 0 : dmg; // jusin case
+
+          console.log('Player attacked for ' + value + ' physical damage, loses ' + dmg + ' health');
+          this.player_character.health_stat -= dmg;
+
+          if (this.player_character.health_stat <= 0) {
+            this.game_over();
+          }
+        }
+      }
+    },
+
+    /**
+    	The player has attacked an enemy
+    */
+    attack_enemy: function attack_enemy() {
+      var attack_values = this.player_character.attack();
+
+      for (var _i2 = 0, _Object$entries2 = Object.entries(attack_values); _i2 < _Object$entries2.length; _i2++) {
+        var _Object$entries2$_i = _slicedToArray(_Object$entries2[_i2], 2),
+            type = _Object$entries2$_i[0],
+            value = _Object$entries2$_i[1];
+
+        if (type == 'physical' && value > 0) {
+          // physical atack
+          var dmg = value; // take into account armour and shield
+
+          dmg -= this.enemy.defense_stat;
+          dmg = dmg < 0 ? 0 : dmg; // jusin case
+
+          console.log('Enemy attacked for ' + value + ' physical damage, loses ' + dmg + ' health');
+          this.enemy.health_stat -= dmg;
+
+          if (this.enemy.health_stat <= 0) {
+            this.end_round();
+          }
+        }
+      }
+    },
+    start_round: function start_round() {
+      this.enemy.can_attack = true;
+    },
+    end_round: function end_round() {
+      this.enemy.can_attack = false;
+      console.log('win!');
+    },
+    game_over: function game_over() {
+      this.enemy.can_attack = false;
+      this.set_current_screen('GAME_OVER_SCREEN');
+    },
+    shield_up: function shield_up() {
+      this.shield_is_up = true;
+    },
+    shield_down: function shield_down() {
+      this.shield_is_up = false;
+    },
+
+    /**
+    	Select a random but level-appropriate enemy to fight, and assign it to this.enemy
+    */
+    select_enemy_to_battle: function select_enemy_to_battle() {
+      var theEnemy = this.all_enemies[1];
+      this.enemy = theEnemy;
     }
-  })
+  }),
+  created: function created() {
+    this.select_enemy_to_battle();
+  }
 });
 
 /***/ }),
@@ -233,6 +384,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vuex__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");
+/* harmony import */ var _classes_Item__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./../../classes/Item */ "./resources/js/classes/Item.js");
+/* harmony import */ var _classes_Weapon__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./../../classes/Weapon */ "./resources/js/classes/Weapon.js");
+/* harmony import */ var _classes_Armour__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./../../classes/Armour */ "./resources/js/classes/Armour.js");
+/* harmony import */ var _classes_Shield__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./../../classes/Shield */ "./resources/js/classes/Shield.js");
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -250,10 +405,45 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
+//
+
+
+
+
 
 /* harmony default export */ __webpack_exports__["default"] = ({
-  computed: _objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapGetters"])(['all_equipment'])),
-  methods: _objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapMutations"])(['set_current_screen']))
+  computed: _objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapGetters"])(['all_equipment']), {}, Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapState"])(['player_character'])),
+  methods: _objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapMutations"])(['set_current_screen']), {
+    purchase: function purchase(item) {
+      if (this.player_character.gold >= item.price) {
+        this.player_character.gold -= item.price;
+
+        switch (item.constructor.name) {
+          case 'Weapon':
+            this.player_character.inventory.push(new _classes_Weapon__WEBPACK_IMPORTED_MODULE_2__["Weapon"](JSON.parse(JSON.stringify(item)))); // clone and copy
+
+            break;
+
+          case 'Armour':
+            this.player_character.inventory.push(new _classes_Armour__WEBPACK_IMPORTED_MODULE_3__["Armour"](JSON.parse(JSON.stringify(item)))); // clone and copy
+
+            break;
+
+          case 'Shield':
+            this.player_character.inventory.push(new _classes_Shield__WEBPACK_IMPORTED_MODULE_4__["Shield"](JSON.parse(JSON.stringify(item)))); // clone and copy
+
+            break;
+
+          case 'Item':
+            this.player_character.inventory.push(new _classes_Item__WEBPACK_IMPORTED_MODULE_1__["Item"](JSON.parse(JSON.stringify(item)))); // clone and copy
+
+            break;
+        }
+      } else {
+        alert('not enough gold - go slay some baddies!');
+      }
+    }
+  })
 });
 
 /***/ }),
@@ -306,6 +496,8 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vuex__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");
 /* harmony import */ var _classes_PlayerCharacter__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../classes/PlayerCharacter */ "./resources/js/classes/PlayerCharacter.js");
+/* harmony import */ var _classes_Shield__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../classes/Shield */ "./resources/js/classes/Shield.js");
+/* harmony import */ var _item_libraries_all_shields__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../item_libraries/all_shields */ "./resources/js/item_libraries/all_shields.js");
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -325,25 +517,172 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
-      character_name: 'Jangus Jangus Jamilaquarry'
+      character_name: '',
+      strength_stat: 15,
+      dexterity_stat: 15,
+      vitality_stat: 15,
+      intelligence_stat: 15,
+      willpower_stat: 15,
+      spare_points: 15
     };
   },
   computed: _objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapState"])(['all_enemies'])),
   methods: _objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapMutations"])(['set_current_screen', 'set_character_name', 'create_new_character']), {
     create_character: function create_character() {
+      if (this.spare_points > 0) return alert('You must assign all points!');
+      if (!this.character_name.replace(/\s/g, "")) return alert('You must name your character!');
       var new_character = new _classes_PlayerCharacter__WEBPACK_IMPORTED_MODULE_1__["PlayerCharacter"]({
         name: this.character_name,
         attack: 1
       });
+      new_character.shield = _item_libraries_all_shields__WEBPACK_IMPORTED_MODULE_3__["all_shields"][0];
+      new_character.gold = 100;
       this.create_new_character(new_character);
       this.set_current_screen('VILLAGE_SCREEN');
+    },
+    randomize_character: function randomize_character() {
+      // reset points
+      this.spare_points = this.strength_stat = this.dexterity_stat = this.vitality_stat = this.intelligence_stat = this.willpower_stat = 15; // apply points randomly
+
+      while (this.spare_points > 0) {
+        var rando = Math.floor(Math.random() * 5);
+
+        switch (rando) {
+          case 0:
+            this.strength_stat++;
+            break;
+
+          case 1:
+            this.dexterity_stat++;
+            break;
+
+          case 2:
+            this.vitality_stat++;
+            break;
+
+          case 3:
+            this.intelligence_stat++;
+            break;
+
+          case 4:
+            this.willpower_stat++;
+            break;
+        }
+
+        this.spare_points--;
+      } // give im a name
+
+
+      this.character_name = 'Jangus Jangus Jobangus';
+    },
+    modify_stat: function modify_stat(stat_name, direction) {
+      if (direction == 'MINUS') {
+        if (this[stat_name] > 5) {
+          this[stat_name]--;
+          this.spare_points++;
+        }
+      }
+
+      if (direction == 'PLUS') {
+        if (this.spare_points > 0) {
+          this[stat_name]++;
+          this.spare_points--;
+        }
+      }
     }
   })
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/screens/GameOverScreen.vue?vue&type=script&lang=js&":
+/*!*********************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/screens/GameOverScreen.vue?vue&type=script&lang=js& ***!
+  \*********************************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var vuex__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+//
+//
+//
+//
+//
+//
+//
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  methods: _objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapMutations"])(['set_current_screen']))
 });
 
 /***/ }),
@@ -379,6 +718,82 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 /***/ }),
 
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/screens/InventoryScreen.vue?vue&type=script&lang=js&":
+/*!**********************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/screens/InventoryScreen.vue?vue&type=script&lang=js& ***!
+  \**********************************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var vuex__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");
+/* harmony import */ var _classes_Item__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./../../classes/Item */ "./resources/js/classes/Item.js");
+/* harmony import */ var _classes_Weapon__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./../../classes/Weapon */ "./resources/js/classes/Weapon.js");
+/* harmony import */ var _classes_Armour__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./../../classes/Armour */ "./resources/js/classes/Armour.js");
+/* harmony import */ var _classes_Shield__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./../../classes/Shield */ "./resources/js/classes/Shield.js");
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+
+
+
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  computed: _objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapGetters"])(['all_equipment']), {}, Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapState"])(['player_character']), {
+    inventory: function inventory() {
+      return this.player_character ? this.player_character.inventory : [];
+    }
+  }),
+  methods: _objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapMutations"])(['set_current_screen']), {
+    equip: function equip(item) {
+      switch (item.constructor.name) {
+        case 'Weapon':
+          this.player_character.equipWeapon(item);
+          break;
+
+        case 'Armour':
+          this.player_character.equipArmour(item);
+          break;
+
+        case 'Shield':
+          this.player_character.equipShield(item);
+          break;
+
+        default:
+          break;
+      } // check limitations
+      // unequip if necessary
+      // place unequipped item in inventory
+      // equip the item
+      // remove it from inventory
+
+    },
+    drop: function drop(item) {
+      this.player_character.inventory.splice(this.player_character.inventory.indexOf(item), 1); // I can't believe there isn't a built in function for this STILL
+    }
+  })
+});
+
+/***/ }),
+
 /***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/screens/MainMenuScreen.vue?vue&type=script&lang=js&":
 /*!*********************************************************************************************************************************************************************************!*\
   !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/screens/MainMenuScreen.vue?vue&type=script&lang=js& ***!
@@ -404,13 +819,12 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
-  data: function data() {
-    return {
-      version: '0.0.1'
-    };
-  },
+  computed: _objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapState"])(['version'])),
   methods: _objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapMutations"])(['set_current_screen']), {
     newGame: function newGame() {
       console.log('new game');
@@ -437,6 +851,8 @@ function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { va
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
+//
+//
 //
 //
 //
@@ -1588,7 +2004,15 @@ var render = function() {
       style: _vm.styleBinding,
       on: { click: _vm.begin_attack_loop }
     },
-    [_c("div", { staticClass: "attack-slider" })]
+    [
+      _c("ul", { staticClass: "enemy-stats" }, [
+        _c("li", [_c("h6", [_vm._v(_vm._s(_vm.enemy.name))])]),
+        _vm._v(" "),
+        _c("li", [_vm._v("Health: " + _vm._s(_vm.enemy.health_stat))])
+      ]),
+      _vm._v(" "),
+      _c("div", { staticClass: "attack-slider" })
+    ]
   )
 }
 var staticRenderFns = []
@@ -1617,6 +2041,21 @@ var render = function() {
     "div",
     { attrs: { id: "game" } },
     [
+      _c(
+        "div",
+        {
+          staticClass: "d-flex align-items-center pb-2",
+          attrs: { id: "game-header" }
+        },
+        [
+          _c("h5", { staticClass: "d-flex flex-grow-1 my-0" }, [
+            _vm._v("Hey You! Slay those Baddies!")
+          ]),
+          _vm._v(" "),
+          _c("small", [_vm._v("v" + _vm._s(_vm.version))])
+        ]
+      ),
+      _vm._v(" "),
       _vm.current_screen == "MAIN_MENU" ? _c("main-menu") : _vm._e(),
       _vm._v(" "),
       _vm.current_screen == "VILLAGE_SCREEN" ? _c("village-screen") : _vm._e(),
@@ -1639,20 +2078,60 @@ var render = function() {
           })
         : _vm._e(),
       _vm._v(" "),
+      _vm.current_screen == "GAME_OVER_SCREEN"
+        ? _c("game-over-screen")
+        : _vm._e(),
+      _vm._v(" "),
+      _vm.current_screen == "INVENTORY_SCREEN"
+        ? _c("inventory-screen")
+        : _vm._e(),
+      _vm._v(" "),
       _vm.current_screen != "MAIN_MENU" &&
       _vm.current_screen != "CHARACTER_STATS_SCREEN" &&
       _vm.current_screen != "CREATE_CHARACTER_SCREEN"
         ? _c(
-            "button",
+            "div",
             {
-              staticClass: "btn btn-secondary",
-              on: {
-                click: function($event) {
-                  return _vm.set_current_screen("CHARACTER_STATS_SCREEN")
-                }
-              }
+              staticClass: "d-flex align-items-center pb-2 w-100",
+              attrs: { id: "game-footer" }
             },
-            [_vm._v("Character Stats")]
+            [
+              _c(
+                "button",
+                {
+                  staticClass: "btn btn-secondary",
+                  on: {
+                    click: function($event) {
+                      return _vm.set_current_screen("CHARACTER_STATS_SCREEN")
+                    }
+                  }
+                },
+                [_vm._v("Character Stats")]
+              ),
+              _vm._v(" "),
+              _c(
+                "button",
+                {
+                  staticClass: "btn btn-secondary",
+                  on: {
+                    click: function($event) {
+                      return _vm.set_current_screen("INVENTORY_SCREEN")
+                    }
+                  }
+                },
+                [_vm._v("Inventory")]
+              ),
+              _vm._v(" "),
+              _c("span", { staticClass: "flex-grow-1 text-right" }, [
+                _vm._v(
+                  "\n\t\t\tGold: " +
+                    _vm._s(
+                      _vm.player_character ? _vm.player_character.gold : 0
+                    ) +
+                    "\n\t\t"
+                )
+              ])
+            ]
           )
         : _vm._e()
     ],
@@ -1686,9 +2165,61 @@ var render = function() {
     { attrs: { id: "battle-screen" } },
     [
       _c("enemy", {
-        attrs: { enemy: _vm.all_enemies[1] },
+        attrs: { enemy: _vm.enemy },
         on: { attack: _vm.attack_player }
       }),
+      _vm._v(" "),
+      _c(
+        "button",
+        {
+          staticClass: "btn btn-danger",
+          on: {
+            click: function($event) {
+              return _vm.attack_enemy()
+            }
+          }
+        },
+        [_vm._v("Attack")]
+      ),
+      _vm._v(" "),
+      _c(
+        "button",
+        {
+          staticClass: "btn btn-warning",
+          on: {
+            mousedown: function($event) {
+              return _vm.shield_up()
+            },
+            mouseup: function($event) {
+              return _vm.shield_down()
+            }
+          }
+        },
+        [_vm._v("Defend")]
+      ),
+      _vm._v(" "),
+      _c(
+        "button",
+        {
+          staticClass: "btn btn-secondary",
+          on: {
+            click: function($event) {
+              return _vm.start_round()
+            }
+          }
+        },
+        [_vm._v("Fight!")]
+      ),
+      _vm._v(" "),
+      _c("div", [
+        _c("h6", { staticClass: "small" }, [
+          _vm._v(_vm._s(_vm.player_character.name))
+        ]),
+        _vm._v(" "),
+        _c("p", [
+          _vm._v("Health: " + _vm._s(_vm.player_character.health_stat) + " ")
+        ])
+      ]),
       _vm._v(" "),
       _c(
         "button",
@@ -1728,36 +2259,50 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", { attrs: { id: "blacksmith-screen" } }, [
-    _c(
-      "ul",
-      _vm._l(_vm.all_equipment, function(item) {
-        return _c("li", [
-          _vm._v(
-            "\n\t\t\t" +
-              _vm._s(item.name) +
-              " - " +
-              _vm._s(item.price) +
-              " gold\n\t\t"
-          )
-        ])
-      }),
-      0
-    ),
-    _vm._v(" "),
-    _c(
-      "button",
-      {
-        staticClass: "btn btn-secondary",
-        on: {
-          click: function($event) {
-            return _vm.set_current_screen("VILLAGE_SCREEN")
+  return _c(
+    "div",
+    { staticClass: "mt-5", attrs: { id: "blacksmith-screen" } },
+    [
+      _c(
+        "ul",
+        { staticClass: "list-unstyled" },
+        _vm._l(_vm.all_equipment, function(item) {
+          return _c("li", { staticClass: "d-flex mb-1" }, [
+            _c("span", { staticClass: "flex-grow-1" }, [
+              _vm._v(_vm._s(item.name) + " - " + _vm._s(item.price) + "g")
+            ]),
+            _vm._v(" "),
+            _c(
+              "button",
+              {
+                staticClass: "btn btn-secondary",
+                on: {
+                  click: function($event) {
+                    return _vm.purchase(item)
+                  }
+                }
+              },
+              [_vm._v("buy")]
+            )
+          ])
+        }),
+        0
+      ),
+      _vm._v(" "),
+      _c(
+        "button",
+        {
+          staticClass: "btn btn-secondary",
+          on: {
+            click: function($event) {
+              return _vm.set_current_screen("VILLAGE_SCREEN")
+            }
           }
-        }
-      },
-      [_vm._v("Back")]
-    )
-  ])
+        },
+        [_vm._v("Back")]
+      )
+    ]
+  )
 }
 var staticRenderFns = []
 render._withStripped = true
@@ -1819,38 +2364,396 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", { attrs: { id: "create-character-screen" } }, [
-    _c("div", { staticClass: "form-group" }, [
-      _c("label", { attrs: { for: "character_name" } }, [
-        _vm._v("\n\t\t\tName your hero:\n\t\t")
+  return _c(
+    "div",
+    { staticClass: "container my-5", attrs: { id: "create-character-screen" } },
+    [
+      _c("div", { staticClass: "row" }, [
+        _c("div", { staticClass: "col" }, [
+          _c("h5", [_vm._v("Create your character")]),
+          _vm._v(" "),
+          _c("label", { attrs: { for: "character_name" } }, [
+            _vm._v("\n\t\t\t\tName:\n\t\t\t")
+          ]),
+          _vm._v(" "),
+          _c("input", {
+            directives: [
+              {
+                name: "model",
+                rawName: "v-model",
+                value: _vm.character_name,
+                expression: "character_name"
+              }
+            ],
+            staticClass: "form-control mb-2",
+            domProps: { value: _vm.character_name },
+            on: {
+              input: function($event) {
+                if ($event.target.composing) {
+                  return
+                }
+                _vm.character_name = $event.target.value
+              }
+            }
+          }),
+          _vm._v(" "),
+          _c("h5", [_vm._v("Assign Points")]),
+          _vm._v(" "),
+          _c("div", { staticClass: "d-flex mb-2" }, [
+            _c("span", { staticClass: "flex-grow-1" }, [
+              _vm._v("Points remaining:")
+            ]),
+            _vm._v(" "),
+            _c("span", [_vm._v(_vm._s(_vm.spare_points))])
+          ]),
+          _vm._v(" "),
+          _c("ul", { staticClass: "list-unstyled no-select" }, [
+            _c("li", { staticClass: "d-flex mb-1" }, [
+              _c("span", { staticClass: "flex-grow-1 no-select" }, [
+                _vm._v("Strength:")
+              ]),
+              _vm._v(" "),
+              _c("span", [
+                _c(
+                  "span",
+                  {
+                    staticClass: "px-3 py-1 cursor-pointer card-1",
+                    on: {
+                      click: function($event) {
+                        $event.stopPropagation()
+                        return _vm.modify_stat("strength_stat", "MINUS")
+                      }
+                    }
+                  },
+                  [_vm._v("-")]
+                ),
+                _vm._v(" "),
+                _c("input", {
+                  directives: [
+                    {
+                      name: "model",
+                      rawName: "v-model",
+                      value: _vm.strength_stat,
+                      expression: "strength_stat"
+                    }
+                  ],
+                  attrs: { disabled: "" },
+                  domProps: { value: _vm.strength_stat },
+                  on: {
+                    input: function($event) {
+                      if ($event.target.composing) {
+                        return
+                      }
+                      _vm.strength_stat = $event.target.value
+                    }
+                  }
+                }),
+                _vm._v(" "),
+                _c(
+                  "span",
+                  {
+                    staticClass: "px-3 py-1 cursor-pointer card-1",
+                    on: {
+                      click: function($event) {
+                        $event.stopPropagation()
+                        return _vm.modify_stat("strength_stat", "PLUS")
+                      }
+                    }
+                  },
+                  [_vm._v("+")]
+                )
+              ])
+            ]),
+            _vm._v(" "),
+            _c("li", { staticClass: "d-flex mb-1" }, [
+              _c("span", { staticClass: "flex-grow-1" }, [
+                _vm._v("Dexterity:")
+              ]),
+              _vm._v(" "),
+              _c("span", [
+                _c(
+                  "span",
+                  {
+                    staticClass: "px-3 py-1 cursor-pointer card-1",
+                    on: {
+                      click: function($event) {
+                        $event.stopPropagation()
+                        return _vm.modify_stat("dexterity_stat", "MINUS")
+                      }
+                    }
+                  },
+                  [_vm._v("-")]
+                ),
+                _vm._v(" "),
+                _c("input", {
+                  directives: [
+                    {
+                      name: "model",
+                      rawName: "v-model",
+                      value: _vm.dexterity_stat,
+                      expression: "dexterity_stat"
+                    }
+                  ],
+                  attrs: { disabled: "" },
+                  domProps: { value: _vm.dexterity_stat },
+                  on: {
+                    input: function($event) {
+                      if ($event.target.composing) {
+                        return
+                      }
+                      _vm.dexterity_stat = $event.target.value
+                    }
+                  }
+                }),
+                _vm._v(" "),
+                _c(
+                  "span",
+                  {
+                    staticClass: "px-3 py-1 cursor-pointer card-1",
+                    on: {
+                      click: function($event) {
+                        $event.stopPropagation()
+                        return _vm.modify_stat("dexterity_stat", "PLUS")
+                      }
+                    }
+                  },
+                  [_vm._v("+")]
+                )
+              ])
+            ]),
+            _vm._v(" "),
+            _c("li", { staticClass: "d-flex mb-1" }, [
+              _c("span", { staticClass: "flex-grow-1" }, [_vm._v("Vitality:")]),
+              _vm._v(" "),
+              _c("span", [
+                _c(
+                  "span",
+                  {
+                    staticClass: "px-3 py-1 cursor-pointer card-1",
+                    on: {
+                      click: function($event) {
+                        $event.stopPropagation()
+                        return _vm.modify_stat("vitality_stat", "MINUS")
+                      }
+                    }
+                  },
+                  [_vm._v("-")]
+                ),
+                _vm._v(" "),
+                _c("input", {
+                  directives: [
+                    {
+                      name: "model",
+                      rawName: "v-model",
+                      value: _vm.vitality_stat,
+                      expression: "vitality_stat"
+                    }
+                  ],
+                  attrs: { disabled: "" },
+                  domProps: { value: _vm.vitality_stat },
+                  on: {
+                    input: function($event) {
+                      if ($event.target.composing) {
+                        return
+                      }
+                      _vm.vitality_stat = $event.target.value
+                    }
+                  }
+                }),
+                _vm._v(" "),
+                _c(
+                  "span",
+                  {
+                    staticClass: "px-3 py-1 cursor-pointer card-1",
+                    on: {
+                      click: function($event) {
+                        $event.stopPropagation()
+                        return _vm.modify_stat("vitality_stat", "PLUS")
+                      }
+                    }
+                  },
+                  [_vm._v("+")]
+                )
+              ])
+            ]),
+            _vm._v(" "),
+            _c("li", { staticClass: "d-flex mb-1" }, [
+              _c("span", { staticClass: "flex-grow-1" }, [
+                _vm._v("Intelligence:")
+              ]),
+              _vm._v(" "),
+              _c("span", [
+                _c(
+                  "span",
+                  {
+                    staticClass: "px-3 py-1 cursor-pointer card-1",
+                    on: {
+                      click: function($event) {
+                        $event.stopPropagation()
+                        return _vm.modify_stat("intelligence_stat", "MINUS")
+                      }
+                    }
+                  },
+                  [_vm._v("-")]
+                ),
+                _vm._v(" "),
+                _c("input", {
+                  directives: [
+                    {
+                      name: "model",
+                      rawName: "v-model",
+                      value: _vm.intelligence_stat,
+                      expression: "intelligence_stat"
+                    }
+                  ],
+                  attrs: { disabled: "" },
+                  domProps: { value: _vm.intelligence_stat },
+                  on: {
+                    input: function($event) {
+                      if ($event.target.composing) {
+                        return
+                      }
+                      _vm.intelligence_stat = $event.target.value
+                    }
+                  }
+                }),
+                _vm._v(" "),
+                _c(
+                  "span",
+                  {
+                    staticClass: "px-3 py-1 cursor-pointer card-1",
+                    on: {
+                      click: function($event) {
+                        $event.stopPropagation()
+                        return _vm.modify_stat("intelligence_stat", "PLUS")
+                      }
+                    }
+                  },
+                  [_vm._v("+")]
+                )
+              ])
+            ]),
+            _vm._v(" "),
+            _c("li", { staticClass: "d-flex mb-1" }, [
+              _c("span", { staticClass: "flex-grow-1" }, [
+                _vm._v("Willpower:")
+              ]),
+              _vm._v(" "),
+              _c("span", [
+                _c(
+                  "span",
+                  {
+                    staticClass: "px-3 py-1 cursor-pointer card-1",
+                    on: {
+                      click: function($event) {
+                        $event.stopPropagation()
+                        return _vm.modify_stat("willpower_stat", "MINUS")
+                      }
+                    }
+                  },
+                  [_vm._v("-")]
+                ),
+                _vm._v(" "),
+                _c("input", {
+                  directives: [
+                    {
+                      name: "model",
+                      rawName: "v-model",
+                      value: _vm.willpower_stat,
+                      expression: "willpower_stat"
+                    }
+                  ],
+                  attrs: { disabled: "" },
+                  domProps: { value: _vm.willpower_stat },
+                  on: {
+                    input: function($event) {
+                      if ($event.target.composing) {
+                        return
+                      }
+                      _vm.willpower_stat = $event.target.value
+                    }
+                  }
+                }),
+                _vm._v(" "),
+                _c(
+                  "span",
+                  {
+                    staticClass: "px-3 py-1 cursor-pointer card-1",
+                    on: {
+                      click: function($event) {
+                        $event.stopPropagation()
+                        return _vm.modify_stat("willpower_stat", "PLUS")
+                      }
+                    }
+                  },
+                  [_vm._v("+")]
+                )
+              ])
+            ])
+          ])
+        ])
       ]),
       _vm._v(" "),
-      _c("input", {
-        directives: [
+      _c("div", { staticClass: "d-flex" }, [
+        _c("span", { staticClass: "flex-grow-1" }, [
+          _c(
+            "button",
+            {
+              staticClass: "btn btn-secondary",
+              on: { click: _vm.randomize_character }
+            },
+            [_vm._v("Random")]
+          )
+        ]),
+        _vm._v(" "),
+        _c(
+          "button",
           {
-            name: "model",
-            rawName: "v-model",
-            value: _vm.character_name,
-            expression: "character_name"
-          }
-        ],
-        staticClass: "form-control",
-        domProps: { value: _vm.character_name },
-        on: {
-          input: function($event) {
-            if ($event.target.composing) {
-              return
-            }
-            _vm.character_name = $event.target.value
-          }
-        }
-      })
-    ]),
+            staticClass: "btn btn-secondary",
+            on: { click: _vm.create_character }
+          },
+          [_vm._v("Go")]
+        )
+      ])
+    ]
+  )
+}
+var staticRenderFns = []
+render._withStripped = true
+
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/screens/GameOverScreen.vue?vue&type=template&id=1e1beca5&":
+/*!*************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/screens/GameOverScreen.vue?vue&type=template&id=1e1beca5& ***!
+  \*************************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("div", { attrs: { id: "game-over-screen" } }, [
+    _c("h1", [_vm._v("Game over!")]),
     _vm._v(" "),
     _c(
       "button",
-      { staticClass: "btn btn-secondary", on: { click: _vm.create_character } },
-      [_vm._v("Go")]
+      {
+        staticClass: "btn btn-secondary",
+        on: {
+          click: function($event) {
+            return _vm.set_current_screen("MAIN_MENU")
+          }
+        }
+      },
+      [_vm._v("Main menu")]
     )
   ])
 }
@@ -1907,6 +2810,82 @@ render._withStripped = true
 
 /***/ }),
 
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/screens/InventoryScreen.vue?vue&type=template&id=3e43e876&":
+/*!**************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/screens/InventoryScreen.vue?vue&type=template&id=3e43e876& ***!
+  \**************************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("div", { staticClass: "mt-5", attrs: { id: "inventory-screen" } }, [
+    _c(
+      "ul",
+      { staticClass: "list-unstyled" },
+      _vm._l(_vm.inventory, function(item) {
+        return _c("li", { staticClass: "d-flex mb-1" }, [
+          _c("span", { staticClass: "flex-grow-1" }, [
+            _vm._v(_vm._s(item.name) + " - " + _vm._s(item.price) + "g")
+          ]),
+          _vm._v(" "),
+          _c(
+            "button",
+            {
+              staticClass: "btn btn-secondary",
+              on: {
+                click: function($event) {
+                  return _vm.equip(item)
+                }
+              }
+            },
+            [_vm._v("equip")]
+          ),
+          _vm._v(" "),
+          _c(
+            "button",
+            {
+              staticClass: "btn btn-secondary",
+              on: {
+                click: function($event) {
+                  return _vm.drop(item)
+                }
+              }
+            },
+            [_vm._v("drop")]
+          )
+        ])
+      }),
+      0
+    ),
+    _vm._v(" "),
+    _c(
+      "button",
+      {
+        staticClass: "btn btn-secondary",
+        on: {
+          click: function($event) {
+            return _vm.set_current_screen("VILLAGE_SCREEN")
+          }
+        }
+      },
+      [_vm._v("Back")]
+    )
+  ])
+}
+var staticRenderFns = []
+render._withStripped = true
+
+
+
+/***/ }),
+
 /***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/screens/MainMenuScreen.vue?vue&type=template&id=75173612&":
 /*!*************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/screens/MainMenuScreen.vue?vue&type=template&id=75173612& ***!
@@ -1922,24 +2901,53 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", { staticClass: "container" }, [
-    _c(
-      "div",
-      {
-        staticClass: "btn btn-secondary",
-        on: {
-          click: function($event) {
-            return _vm.newGame()
-          }
-        }
-      },
-      [_vm._v("\n\t\tNew Game\n\t")]
-    ),
-    _vm._v(" "),
-    _c("small", [_vm._v(_vm._s(_vm.version))])
-  ])
+  return _c(
+    "div",
+    {
+      staticClass:
+        "container d-flex align-items-center justify-content-center h-100"
+    },
+    [
+      _c(
+        "div",
+        {
+          staticClass: "d-flex flex-column text-center",
+          attrs: { id: "main-menu" }
+        },
+        [
+          _vm._m(0),
+          _vm._v(" "),
+          _c(
+            "button",
+            {
+              staticClass: "btn btn-secondary d-inline-block",
+              on: {
+                click: function($event) {
+                  return _vm.newGame()
+                }
+              }
+            },
+            [_vm._v("\n\t\t\tNew Game\n\t\t")]
+          ),
+          _vm._v(" "),
+          _c("small", [_vm._v("v" + _vm._s(_vm.version))])
+        ]
+      )
+    ]
+  )
 }
-var staticRenderFns = []
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("h1", [
+      _vm._v("Hey you!"),
+      _c("br"),
+      _vm._v(" Slay those baddies!")
+    ])
+  }
+]
 render._withStripped = true
 
 
@@ -1961,46 +2969,55 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", { attrs: { id: "village-screen" } }, [
-    _c(
-      "button",
-      {
-        staticClass: "btn btn-secondary",
-        on: {
-          click: function($event) {
-            return _vm.set_current_screen("BLACKSMITH_SCREEN")
-          }
-        }
-      },
-      [_vm._v("Blacksmith")]
-    ),
-    _vm._v(" "),
-    _c(
-      "button",
-      {
-        staticClass: "btn btn-secondary",
-        on: {
-          click: function($event) {
-            return _vm.set_current_screen("INN_SCREEN")
-          }
-        }
-      },
-      [_vm._v("Inn")]
-    ),
-    _vm._v(" "),
-    _c(
-      "button",
-      {
-        staticClass: "btn btn-secondary",
-        on: {
-          click: function($event) {
-            return _vm.set_current_screen("BATTLE_SCREEN")
-          }
-        }
-      },
-      [_vm._v("To Battle!")]
-    )
-  ])
+  return _c(
+    "div",
+    {
+      staticClass:
+        "container d-flex align-items-center justify-content-center h-100"
+    },
+    [
+      _c("div", { attrs: { id: "village-screen" } }, [
+        _c(
+          "button",
+          {
+            staticClass: "btn btn-secondary",
+            on: {
+              click: function($event) {
+                return _vm.set_current_screen("BLACKSMITH_SCREEN")
+              }
+            }
+          },
+          [_vm._v("Blacksmith")]
+        ),
+        _vm._v(" "),
+        _c(
+          "button",
+          {
+            staticClass: "btn btn-secondary",
+            on: {
+              click: function($event) {
+                return _vm.set_current_screen("INN_SCREEN")
+              }
+            }
+          },
+          [_vm._v("Inn")]
+        ),
+        _vm._v(" "),
+        _c(
+          "button",
+          {
+            staticClass: "btn btn-secondary",
+            on: {
+              click: function($event) {
+                return _vm.set_current_screen("BATTLE_SCREEN")
+              }
+            }
+          },
+          [_vm._v("To Battle!")]
+        )
+      ])
+    ]
+  )
 }
 var staticRenderFns = []
 render._withStripped = true
@@ -15282,7 +16299,18 @@ function () {
     _classCallCheck(this, Battleable);
 
     this.health_stat = init.health || 1;
-    this.defense_stat = init.defense || 1; // attack is handled with different types of damage - physical, magical, fire, electric etc
+    this.defense_stat = init.defense || 1;
+    this.level_stat = init.level || 1;
+    this.dexterity = init.dexterity || 1; // critical hit chance, dodging, landing hits
+
+    this.vitality = init.vitality || 1; // stamina total and recovery, movement speed
+
+    this.strength = init.strength || 1; // health, attack, heavier gear, encumberance
+
+    this.intelligence = init.intelligence || 1; // mana total and recovery, high level spells
+
+    this.willpower = init.willpower || 1; // magic attack and defense, magical accuracy
+    // attack is handled with different types of damage - physical, magical, fire, electric etc
     // so if we are handed a simple number for attack, it's simply physical damage. Otherwise the
     // passed in object will specifically set different damage types
 
@@ -15358,6 +16386,8 @@ function (_Battleable) {
     _this.name = init.name || 'Untitled Enemy';
     _this.speed_stat = init.speed || 1; // attack timer - larger is slower
 
+    _this.can_attack = false; // a toggle for the enemy attacking
+
     return _this;
   }
 
@@ -15412,6 +16442,10 @@ var Item = function Item(init) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "PlayerCharacter", function() { return PlayerCharacter; });
 /* harmony import */ var _Battleable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Battleable */ "./resources/js/classes/Battleable.js");
+/* harmony import */ var _Item__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Item */ "./resources/js/classes/Item.js");
+/* harmony import */ var _Weapon__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Weapon */ "./resources/js/classes/Weapon.js");
+/* harmony import */ var _Armour__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./Armour */ "./resources/js/classes/Armour.js");
+/* harmony import */ var _Shield__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./Shield */ "./resources/js/classes/Shield.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -15431,6 +16465,10 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
 
+
+
+
+
 var PlayerCharacter =
 /*#__PURE__*/
 function (_Battleable) {
@@ -15443,34 +16481,90 @@ function (_Battleable) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(PlayerCharacter).call(this, init));
     _this.name = init.name || 'Untitled Character';
-    _this.level_stat = init.level || 1;
-    _this.dexterity = init.dexterity || 1; // critical hit chance, dodging, landing hits
-
-    _this.vitality = init.vitality || 1; // stamina total and recovery, movement speed
-
-    _this.strength = init.strength || 1; // health, attack, heavier gear, encumberance
-
-    _this.intelligence = init.intelligence || 1; // mana total and recovery, high level spells
-
-    _this.willpower = init.willpower || 1; // magic attack and defense, magical accuracy
-
+    _this.weapon = {};
+    _this.shield = {};
+    _this.gold = 0;
+    _this.inventory = [];
+    _this.armourSlots = {
+      helm: {},
+      left_pauldron: {},
+      right_pauldron: {},
+      cuirass: {},
+      greaves: {},
+      boots: {},
+      gloves: {}
+    };
+    _this.potion_belt_size = 0;
+    _this.potion_belt = new Array(_this.potion_belt_size);
     return _this;
   }
 
   _createClass(PlayerCharacter, [{
-    key: "stats",
-    get: function get() {
-      return {
-        level: this.level_stat,
-        health: this.health_stat,
-        defense: this.defense_stat,
-        attack: this.attack_stat,
-        dexterity: this.dexterity,
-        vitality: this.vitality,
-        strength: this.strength,
-        intelligence: this.intelligence,
-        willpower: this.willpower
-      };
+    key: "equipWeapon",
+    value: function equipWeapon(weapon) {
+      if (!(weapon instanceof _Weapon__WEBPACK_IMPORTED_MODULE_2__["Weapon"])) throw "Cannot equip a non-weapon type as a weapon, silly";
+
+      if (this.weapon instanceof _Weapon__WEBPACK_IMPORTED_MODULE_2__["Weapon"]) {
+        // we already have a weapon equipped
+        // unequip it
+        this.inventory.push(this.weapon);
+      }
+
+      this.weapon = weapon;
+      this.inventory.splice(this.inventory.indexOf(weapon), 1);
+    }
+  }, {
+    key: "equipShield",
+    value: function equipShield(shield) {
+      if (!(shield instanceof _Shield__WEBPACK_IMPORTED_MODULE_4__["Shield"])) throw "Cannot equip a non-shield type as a shield, silly";
+
+      if (this.shield instanceof _Shield__WEBPACK_IMPORTED_MODULE_4__["Shield"]) {
+        // we already have a shield equipped
+        // unequip it
+        this.inventory.push(this.shield);
+      }
+
+      this.shield = shield;
+      this.inventory.splice(this.inventory.indexOf(shield), 1);
+    }
+  }, {
+    key: "equipArmour",
+    value: function equipArmour(armour) {
+      if (!(armour instanceof _Armour__WEBPACK_IMPORTED_MODULE_3__["Armour"])) throw "Cannot equip a non-armour type as armour, silly";
+      var armourSlot = armour.slot.toLowerCase();
+
+      if (this.armourSlots[armourSlot] instanceof _Armour__WEBPACK_IMPORTED_MODULE_3__["Armour"]) {
+        // we already have some armour equipped
+        // unequip it
+        this.inventory.push(this.armourSlots[armourSlot]);
+      }
+
+      this.armourSlots[armourSlot] = armour;
+      this.inventory.splice(this.inventory.indexOf(armour), 1);
+    }
+  }, {
+    key: "getTotalArmourRating",
+    value: function getTotalArmourRating() {
+      var _this2 = this;
+
+      var total = 0;
+      Object.keys(this.armourSlots).map(function (key) {
+        return total += _this2.armourSlots[key].defense || 0;
+      });
+      return total;
+    }
+  }, {
+    key: "getTotalEncumberance",
+    value: function getTotalEncumberance() {
+      var _this3 = this;
+
+      var total = 0;
+      Object.keys(this.armourSlots).map(function (key) {
+        return total += _this3.armourSlots[key].weight || 0;
+      });
+      total += this.weapon.weight || 0;
+      total += this.shield.weight || 0;
+      return total;
     }
   }]);
 
@@ -15493,6 +16587,10 @@ __webpack_require__.r(__webpack_exports__);
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
 function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
 
@@ -15522,6 +16620,19 @@ function (_Item) {
     _this.repair = init.repair || 100;
     return _this;
   }
+
+  _createClass(Shield, [{
+    key: "take_damage",
+    value: function take_damage(dmg) {
+      this.repair -= dmg;
+
+      if (this.repair <= 0) {
+        //send an event or smth
+        console.log('Shield broke!');
+        this.defense = 0;
+      }
+    }
+  }]);
 
   return Shield;
 }(_Item__WEBPACK_IMPORTED_MODULE_0__["Item"]);
@@ -15583,15 +16694,14 @@ function (_Item) {
 /*!*******************************************!*\
   !*** ./resources/js/components/Enemy.vue ***!
   \*******************************************/
-/*! no static exports found */
+/*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _Enemy_vue_vue_type_template_id_d88377a6_scoped_true___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Enemy.vue?vue&type=template&id=d88377a6&scoped=true& */ "./resources/js/components/Enemy.vue?vue&type=template&id=d88377a6&scoped=true&");
 /* harmony import */ var _Enemy_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Enemy.vue?vue&type=script&lang=js& */ "./resources/js/components/Enemy.vue?vue&type=script&lang=js&");
-/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _Enemy_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _Enemy_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__[key]; }) }(__WEBPACK_IMPORT_KEY__));
-/* harmony import */ var _Enemy_vue_vue_type_style_index_0_id_d88377a6_scoped_true_lang_scss___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Enemy.vue?vue&type=style&index=0&id=d88377a6&scoped=true&lang=scss& */ "./resources/js/components/Enemy.vue?vue&type=style&index=0&id=d88377a6&scoped=true&lang=scss&");
+/* empty/unused harmony star reexport *//* harmony import */ var _Enemy_vue_vue_type_style_index_0_id_d88377a6_scoped_true_lang_scss___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Enemy.vue?vue&type=style&index=0&id=d88377a6&scoped=true&lang=scss& */ "./resources/js/components/Enemy.vue?vue&type=style&index=0&id=d88377a6&scoped=true&lang=scss&");
 /* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
 
 
@@ -15623,7 +16733,7 @@ component.options.__file = "resources/js/components/Enemy.vue"
 /*!********************************************************************!*\
   !*** ./resources/js/components/Enemy.vue?vue&type=script&lang=js& ***!
   \********************************************************************/
-/*! no static exports found */
+/*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -16012,6 +17122,75 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./resources/js/components/screens/GameOverScreen.vue":
+/*!************************************************************!*\
+  !*** ./resources/js/components/screens/GameOverScreen.vue ***!
+  \************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _GameOverScreen_vue_vue_type_template_id_1e1beca5___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./GameOverScreen.vue?vue&type=template&id=1e1beca5& */ "./resources/js/components/screens/GameOverScreen.vue?vue&type=template&id=1e1beca5&");
+/* harmony import */ var _GameOverScreen_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./GameOverScreen.vue?vue&type=script&lang=js& */ "./resources/js/components/screens/GameOverScreen.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+  _GameOverScreen_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _GameOverScreen_vue_vue_type_template_id_1e1beca5___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _GameOverScreen_vue_vue_type_template_id_1e1beca5___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/screens/GameOverScreen.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/screens/GameOverScreen.vue?vue&type=script&lang=js&":
+/*!*************************************************************************************!*\
+  !*** ./resources/js/components/screens/GameOverScreen.vue?vue&type=script&lang=js& ***!
+  \*************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_GameOverScreen_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/babel-loader/lib??ref--4-0!../../../../node_modules/vue-loader/lib??vue-loader-options!./GameOverScreen.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/screens/GameOverScreen.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_GameOverScreen_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/screens/GameOverScreen.vue?vue&type=template&id=1e1beca5&":
+/*!*******************************************************************************************!*\
+  !*** ./resources/js/components/screens/GameOverScreen.vue?vue&type=template&id=1e1beca5& ***!
+  \*******************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_GameOverScreen_vue_vue_type_template_id_1e1beca5___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../../node_modules/vue-loader/lib??vue-loader-options!./GameOverScreen.vue?vue&type=template&id=1e1beca5& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/screens/GameOverScreen.vue?vue&type=template&id=1e1beca5&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_GameOverScreen_vue_vue_type_template_id_1e1beca5___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_GameOverScreen_vue_vue_type_template_id_1e1beca5___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
 /***/ "./resources/js/components/screens/InnScreen.vue":
 /*!*******************************************************!*\
   !*** ./resources/js/components/screens/InnScreen.vue ***!
@@ -16076,6 +17255,75 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_InnScreen_vue_vue_type_template_id_154055d2___WEBPACK_IMPORTED_MODULE_0__["render"]; });
 
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_InnScreen_vue_vue_type_template_id_154055d2___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
+/***/ "./resources/js/components/screens/InventoryScreen.vue":
+/*!*************************************************************!*\
+  !*** ./resources/js/components/screens/InventoryScreen.vue ***!
+  \*************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _InventoryScreen_vue_vue_type_template_id_3e43e876___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./InventoryScreen.vue?vue&type=template&id=3e43e876& */ "./resources/js/components/screens/InventoryScreen.vue?vue&type=template&id=3e43e876&");
+/* harmony import */ var _InventoryScreen_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./InventoryScreen.vue?vue&type=script&lang=js& */ "./resources/js/components/screens/InventoryScreen.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+  _InventoryScreen_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _InventoryScreen_vue_vue_type_template_id_3e43e876___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _InventoryScreen_vue_vue_type_template_id_3e43e876___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/screens/InventoryScreen.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/screens/InventoryScreen.vue?vue&type=script&lang=js&":
+/*!**************************************************************************************!*\
+  !*** ./resources/js/components/screens/InventoryScreen.vue?vue&type=script&lang=js& ***!
+  \**************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_InventoryScreen_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/babel-loader/lib??ref--4-0!../../../../node_modules/vue-loader/lib??vue-loader-options!./InventoryScreen.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/screens/InventoryScreen.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_InventoryScreen_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/screens/InventoryScreen.vue?vue&type=template&id=3e43e876&":
+/*!********************************************************************************************!*\
+  !*** ./resources/js/components/screens/InventoryScreen.vue?vue&type=template&id=3e43e876& ***!
+  \********************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_InventoryScreen_vue_vue_type_template_id_3e43e876___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../../node_modules/vue-loader/lib??vue-loader-options!./InventoryScreen.vue?vue&type=template&id=3e43e876& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/screens/InventoryScreen.vue?vue&type=template&id=3e43e876&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_InventoryScreen_vue_vue_type_template_id_3e43e876___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_InventoryScreen_vue_vue_type_template_id_3e43e876___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
 
 
 
@@ -16239,18 +17487,20 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _components_screens_BattleScreen__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./components/screens/BattleScreen */ "./resources/js/components/screens/BattleScreen.vue");
 /* harmony import */ var _components_screens_CreateCharacterScreen__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./components/screens/CreateCharacterScreen */ "./resources/js/components/screens/CreateCharacterScreen.vue");
 /* harmony import */ var _components_screens_CharacterStatsScreen__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./components/screens/CharacterStatsScreen */ "./resources/js/components/screens/CharacterStatsScreen.vue");
-/* harmony import */ var _components_Enemy__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./components/Enemy */ "./resources/js/components/Enemy.vue");
-/* harmony import */ var _components_Game__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./components/Game */ "./resources/js/components/Game.vue");
-/* harmony import */ var _classes_Enemy__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./classes/Enemy */ "./resources/js/classes/Enemy.js");
-/* harmony import */ var _classes_Item__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./classes/Item */ "./resources/js/classes/Item.js");
-/* harmony import */ var _classes_Weapon__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./classes/Weapon */ "./resources/js/classes/Weapon.js");
-/* harmony import */ var _classes_Armour__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./classes/Armour */ "./resources/js/classes/Armour.js");
-/* harmony import */ var _classes_Shield__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./classes/Shield */ "./resources/js/classes/Shield.js");
-/* harmony import */ var _item_libraries_all_weapons__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./item_libraries/all_weapons */ "./resources/js/item_libraries/all_weapons.js");
-/* harmony import */ var _item_libraries_all_armour__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ./item_libraries/all_armour */ "./resources/js/item_libraries/all_armour.js");
-/* harmony import */ var _item_libraries_all_shields__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ./item_libraries/all_shields */ "./resources/js/item_libraries/all_shields.js");
-/* harmony import */ var _item_libraries_all_enemies__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! ./item_libraries/all_enemies */ "./resources/js/item_libraries/all_enemies.js");
-/* harmony import */ var _classes_PlayerCharacter__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! ./classes/PlayerCharacter */ "./resources/js/classes/PlayerCharacter.js");
+/* harmony import */ var _components_screens_InventoryScreen__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./components/screens/InventoryScreen */ "./resources/js/components/screens/InventoryScreen.vue");
+/* harmony import */ var _components_screens_GameOverScreen__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./components/screens/GameOverScreen */ "./resources/js/components/screens/GameOverScreen.vue");
+/* harmony import */ var _components_Enemy__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./components/Enemy */ "./resources/js/components/Enemy.vue");
+/* harmony import */ var _components_Game__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./components/Game */ "./resources/js/components/Game.vue");
+/* harmony import */ var _classes_Enemy__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./classes/Enemy */ "./resources/js/classes/Enemy.js");
+/* harmony import */ var _classes_Item__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./classes/Item */ "./resources/js/classes/Item.js");
+/* harmony import */ var _classes_Weapon__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./classes/Weapon */ "./resources/js/classes/Weapon.js");
+/* harmony import */ var _classes_Armour__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./classes/Armour */ "./resources/js/classes/Armour.js");
+/* harmony import */ var _classes_Shield__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ./classes/Shield */ "./resources/js/classes/Shield.js");
+/* harmony import */ var _item_libraries_all_weapons__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ./item_libraries/all_weapons */ "./resources/js/item_libraries/all_weapons.js");
+/* harmony import */ var _item_libraries_all_armour__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! ./item_libraries/all_armour */ "./resources/js/item_libraries/all_armour.js");
+/* harmony import */ var _item_libraries_all_shields__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! ./item_libraries/all_shields */ "./resources/js/item_libraries/all_shields.js");
+/* harmony import */ var _item_libraries_all_enemies__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! ./item_libraries/all_enemies */ "./resources/js/item_libraries/all_enemies.js");
+/* harmony import */ var _classes_PlayerCharacter__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! ./classes/PlayerCharacter */ "./resources/js/classes/PlayerCharacter.js");
 /* setting up dependencies */
 
 
@@ -16273,10 +17523,14 @@ vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('battle-screen', _component
 vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('create-character-screen', _components_screens_CreateCharacterScreen__WEBPACK_IMPORTED_MODULE_7__["default"]);
 
 vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('character-stats-screen', _components_screens_CharacterStatsScreen__WEBPACK_IMPORTED_MODULE_8__["default"]);
+
+vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('inventory-screen', _components_screens_InventoryScreen__WEBPACK_IMPORTED_MODULE_9__["default"]);
+
+vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('game-over-screen', _components_screens_GameOverScreen__WEBPACK_IMPORTED_MODULE_10__["default"]);
 /* elements */
 
 
-vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('enemy', _components_Enemy__WEBPACK_IMPORTED_MODULE_9__["default"]);
+vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('enemy', _components_Enemy__WEBPACK_IMPORTED_MODULE_11__["default"]);
 
 /* end dependencies */
 
@@ -16294,12 +17548,13 @@ vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('enemy', _components_Enemy_
 
 var store = new vuex__WEBPACK_IMPORTED_MODULE_1__["default"].Store({
   state: {
+    version: '0.0.1',
     current_screen: 'MAIN_MENU',
     previous_screen: '',
-    all_weapons: _item_libraries_all_weapons__WEBPACK_IMPORTED_MODULE_16__["all_weapons"],
-    all_armour: _item_libraries_all_armour__WEBPACK_IMPORTED_MODULE_17__["all_armour"],
-    all_shields: _item_libraries_all_shields__WEBPACK_IMPORTED_MODULE_18__["all_shields"],
-    all_enemies: _item_libraries_all_enemies__WEBPACK_IMPORTED_MODULE_19__["all_enemies"],
+    all_weapons: _item_libraries_all_weapons__WEBPACK_IMPORTED_MODULE_18__["all_weapons"],
+    all_armour: _item_libraries_all_armour__WEBPACK_IMPORTED_MODULE_19__["all_armour"],
+    all_shields: _item_libraries_all_shields__WEBPACK_IMPORTED_MODULE_20__["all_shields"],
+    all_enemies: _item_libraries_all_enemies__WEBPACK_IMPORTED_MODULE_21__["all_enemies"],
     player_character: null
   },
   getters: {
@@ -16334,7 +17589,7 @@ new vue__WEBPACK_IMPORTED_MODULE_0___default.a({
   el: '#game',
   store: store,
   render: function render(h) {
-    return h(_components_Game__WEBPACK_IMPORTED_MODULE_10__["default"]);
+    return h(_components_Game__WEBPACK_IMPORTED_MODULE_12__["default"]);
   }
 });
 
@@ -16370,6 +17625,60 @@ var all_armour = [new _classes_Armour__WEBPACK_IMPORTED_MODULE_0__["Armour"]({
   defense: 0,
   price: 1,
   slot: 'BOOTS'
+}), new _classes_Armour__WEBPACK_IMPORTED_MODULE_0__["Armour"]({
+  name: 'Paupers Hat',
+  weight: 0.25,
+  defense: 0,
+  price: 1,
+  slot: 'HELM'
+}), new _classes_Armour__WEBPACK_IMPORTED_MODULE_0__["Armour"]({
+  name: 'Hard Canvas Pants',
+  weight: 0.5,
+  defense: 1.2,
+  price: 5,
+  slot: 'GREAVES'
+}), new _classes_Armour__WEBPACK_IMPORTED_MODULE_0__["Armour"]({
+  name: 'Fortified Felt Vest',
+  weight: 0.65,
+  defense: 2.1,
+  price: 15,
+  slot: 'CUIRASS'
+}), new _classes_Armour__WEBPACK_IMPORTED_MODULE_0__["Armour"]({
+  name: 'Travellers Shoes',
+  weight: 0.5,
+  defense: 0,
+  price: 1,
+  slot: 'BOOTS'
+}), new _classes_Armour__WEBPACK_IMPORTED_MODULE_0__["Armour"]({
+  name: 'Travellers Hat',
+  weight: 0.25,
+  defense: 0.2,
+  price: 1,
+  slot: 'HELM'
+}), new _classes_Armour__WEBPACK_IMPORTED_MODULE_0__["Armour"]({
+  name: 'Soft Leather Leggings',
+  weight: 0.85,
+  defense: 3.7,
+  price: 25,
+  slot: 'GREAVES'
+}), new _classes_Armour__WEBPACK_IMPORTED_MODULE_0__["Armour"]({
+  name: 'Leather Jacket',
+  weight: 1.65,
+  defense: 8,
+  price: 125,
+  slot: 'CUIRASS'
+}), new _classes_Armour__WEBPACK_IMPORTED_MODULE_0__["Armour"]({
+  name: 'Leather Boots',
+  weight: 2.5,
+  defense: 12,
+  price: 35,
+  slot: 'BOOTS'
+}), new _classes_Armour__WEBPACK_IMPORTED_MODULE_0__["Armour"]({
+  name: 'Thick Cowl',
+  weight: 3.25,
+  defense: 1.2,
+  price: 45,
+  slot: 'HELM'
 })];
 
 /***/ }),
@@ -16395,7 +17704,7 @@ var all_enemies = [new _classes_Enemy__WEBPACK_IMPORTED_MODULE_0__["Enemy"]({
 }), new _classes_Enemy__WEBPACK_IMPORTED_MODULE_0__["Enemy"]({
   name: 'Flappy Bat',
   health: 5,
-  attack: 0.1,
+  attack: 3,
   defense: 0.2,
   speed: 0.5
 }), new _classes_Enemy__WEBPACK_IMPORTED_MODULE_0__["Enemy"]({
@@ -16423,8 +17732,9 @@ __webpack_require__.r(__webpack_exports__);
 var all_shields = [new _classes_Shield__WEBPACK_IMPORTED_MODULE_0__["Shield"]({
   name: 'Pot lid',
   weight: 0.75,
-  defense: 0.75,
-  price: 2
+  defense: 3,
+  price: 2,
+  repair: 20
 })];
 
 /***/ }),

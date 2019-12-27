@@ -7,6 +7,12 @@ export class Battleable {
 	constructor( init ){
 		this.health_stat = init.health			|| 1;
 		this.defense_stat = init.defense		|| 1;
+		this.level_stat = init.level 			|| 1;
+		this.dexterity = init.dexterity			|| 1; // critical hit chance, dodging, landing hits
+		this.vitality = init.vitality 			|| 1; // stamina total and recovery, movement speed
+		this.strength = init.strength 			|| 1; // health, attack, heavier gear, encumberance
+		this.intelligence = init.intelligence	|| 1; // mana total and recovery, high level spells
+		this.willpower = init.willpower 		|| 1; // magic attack and defense, magical accuracy
 		
 		// attack is handled with different types of damage - physical, magical, fire, electric etc
 		// so if we are handed a simple number for attack, it's simply physical damage. Otherwise the
@@ -29,5 +35,6 @@ export class Battleable {
 	attack(){
 		return this.attack_stat;
 	}
+	
 	
 }

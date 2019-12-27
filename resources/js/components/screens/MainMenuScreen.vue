@@ -1,19 +1,22 @@
 <template>
-	<div class=container>
-		<div class="btn btn-secondary" @click="newGame()">
-			New Game
+	<div class="container d-flex align-items-center justify-content-center h-100">
+		<div id="main-menu" class="d-flex flex-column text-center">
+			<h1>Hey you!<br /> Slay those baddies!</h1>
+			<button class="btn btn-secondary d-inline-block" @click="newGame()">
+				New Game
+			</button>
+			<small>v{{version}}</small>
 		</div>
-		<small>{{version}}</small>
 	</div>
 </template>
 
 <script>
 import {mapState, mapMutations} from 'vuex'
 export default {
-	data(){
-		return {
-			version: '0.0.1',
-		}
+	computed: {
+		...mapState([
+			'version',
+		]),
 	},
 	methods: {
 		...mapMutations([

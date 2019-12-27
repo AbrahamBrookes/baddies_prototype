@@ -9,3 +9,34 @@
 	margin: 0 auto auto;
 	border: 1px solid grey;
 }
+
+#game-header {
+	border-bottom: 1px solid #ededed;
+    height: 32px;
+    margin-bottom: -32px;
+}
+
+#game-footer {
+	position: absolute;
+	bottom: 0;
+}
+
+.cursor-pointer {
+	cursor: pointer;
+}
+
+.card-1 {
+	border: 1px solid #afafaf;
+	border-radius: 3px;
+	box-shadow: 1px 1px 4px rgba(0,0,0,0.3);
+}
+
+.no-select {
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Old versions of Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome, Opera and Firefox */
+}

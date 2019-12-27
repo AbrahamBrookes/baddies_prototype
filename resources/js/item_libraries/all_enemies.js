@@ -12,7 +12,7 @@ export var all_enemies = [
 	new Enemy({
 		name: 'Flappy Bat',
 		health: 5,
-		attack: 0.1,
+		attack: 3,
 		defense: 0.2,
 		speed: 0.5,
 	}),
